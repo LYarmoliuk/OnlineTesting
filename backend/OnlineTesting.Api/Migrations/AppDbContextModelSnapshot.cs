@@ -77,6 +77,38 @@ namespace OnlineTesting.Api.Migrations
                     b.ToTable("Questions");
                 });
 
+            modelBuilder.Entity("OnlineTesting.Api.Models.StudentAnswer", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("AnsweredAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("QuestionId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("SelectedOptionId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("TestAttemptId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("QuestionId");
+
+                    b.HasIndex("SelectedOptionId");
+
+                    b.HasIndex("TestAttemptId", "QuestionId")
+                        .IsUnique();
+
+                    b.ToTable("StudentAnswers");
+                });
+
             modelBuilder.Entity("OnlineTesting.Api.Models.Test", b =>
                 {
                     b.Property<int>("Id")
@@ -106,6 +138,44 @@ namespace OnlineTesting.Api.Migrations
                     b.ToTable("Tests");
                 });
 
+            modelBuilder.Entity("OnlineTesting.Api.Models.TestAttempt", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<Guid>("AccessToken")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("CompletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int?>("Score")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("StartedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<int>("TestId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AccessToken")
+                        .IsUnique();
+
+                    b.HasIndex("TestId");
+
+                    b.ToTable("TestAttempts");
+                });
+
             modelBuilder.Entity("OnlineTesting.Api.Models.AnswerOption", b =>
                 {
                     b.HasOne("OnlineTesting.Api.Models.Question", "Question")
@@ -128,6 +198,44 @@ namespace OnlineTesting.Api.Migrations
                     b.Navigation("Test");
                 });
 
+            modelBuilder.Entity("OnlineTesting.Api.Models.StudentAnswer", b =>
+                {
+                    b.HasOne("OnlineTesting.Api.Models.Question", "Question")
+                        .WithMany()
+                        .HasForeignKey("QuestionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("OnlineTesting.Api.Models.AnswerOption", "SelectedOption")
+                        .WithMany()
+                        .HasForeignKey("SelectedOptionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("OnlineTesting.Api.Models.TestAttempt", "TestAttempt")
+                        .WithMany("Answers")
+                        .HasForeignKey("TestAttemptId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Question");
+
+                    b.Navigation("SelectedOption");
+
+                    b.Navigation("TestAttempt");
+                });
+
+            modelBuilder.Entity("OnlineTesting.Api.Models.TestAttempt", b =>
+                {
+                    b.HasOne("OnlineTesting.Api.Models.Test", "Test")
+                        .WithMany("Attempts")
+                        .HasForeignKey("TestId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Test");
+                });
+
             modelBuilder.Entity("OnlineTesting.Api.Models.Question", b =>
                 {
                     b.Navigation("AnswerOptions");
@@ -135,7 +243,14 @@ namespace OnlineTesting.Api.Migrations
 
             modelBuilder.Entity("OnlineTesting.Api.Models.Test", b =>
                 {
+                    b.Navigation("Attempts");
+
                     b.Navigation("Questions");
+                });
+
+            modelBuilder.Entity("OnlineTesting.Api.Models.TestAttempt", b =>
+                {
+                    b.Navigation("Answers");
                 });
 #pragma warning restore 612, 618
         }

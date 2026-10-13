@@ -6,9 +6,11 @@ import type {
   QuestionInput,
   AnswerOption,
   AnswerOptionInput,
+  AttemptStartResponse,
+  AttemptResult,
 } from '@/types/testing'
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080'
+const API_URL = import.meta.env.VITE_API_URL || ''
 
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   const response = await fetch(`${API_URL}${path}`, {
@@ -67,4 +69,34 @@ export const api = {
     request<AnswerOption>(`/api/options/${id}`, json('PUT', data)),
   deleteOption: (id: number) =>
     request<void>(`/api/options/${id}`, json('DELETE')),
+
+  startAttempt: (testId: number) =>
+    request<AttemptStartResponse>(
+      `/api/tests/${testId}/attempts`,
+      json('POST'),
+    ),
+
+  saveAttemptAnswer: (
+    attemptId: number,
+    accessToken: string,
+    questionId: number,
+    selectedOptionId: number,
+  ) =>
+    request<void>(
+      `/api/attempts/${attemptId}/answers`,
+      {
+        ...json('PUT', { questionId, selectedOptionId }),
+        headers: { 'X-Attempt-Token': accessToken },
+      },
+    ),
+
+  submitAttempt: (attemptId: number, accessToken: string) =>
+    request<AttemptResult>(
+      `/api/attempts/${attemptId}/submit`,
+      {
+        ...json('POST'),
+        headers: { 'X-Attempt-Token': accessToken },
+      },
+    ),
+
 }

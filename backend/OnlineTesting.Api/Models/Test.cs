@@ -5,6 +5,9 @@ namespace OnlineTesting.Api.Models;
 
 public class Test
 {
+    public ICollection<TestAttempt> Attempts { get; set; }
+    = new List<TestAttempt>();
+    
     public int Id { get; set; }
 
     [Required]
