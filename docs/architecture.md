@@ -1,54 +1,137 @@
-﻿# Архітектура системи OnlineTesting
+﻿# Архітектура OnlineTesting
 
-## 1. Загальна архітектура
+## 1. Загальний опис
 
-Система побудована за клієнт-серверною архітектурою. Frontend відповідає за інтерфейс користувача, backend реалізує REST API та бізнес-логіку, PostgreSQL зберігає дані.
+OnlineTesting — вебсистема для створення та проходження онлайн-тестів.
 
-## 2. Компоненти
+Система складається з трьох основних контейнерів:
+- Frontend — Vue 3 + TypeScript.
+- Backend API — ASP.NET Core 10.
+- Database — PostgreSQL 17.
 
-### Frontend
-Vue 3 і TypeScript використовуються для побудови інтерфейсу керування тестами, запитаннями та варіантами відповідей. Vue Router відповідає за маршрутизацію, Pinia доступна для керування станом. HTTP-запити виконуються через Fetch API.
+Усі компоненти можуть запускатися за допомогою Docker Compose.
 
-### Backend
-ASP.NET Core Web API обробляє HTTP-запити. Контролери приймають запити, перевіряють вхідні дані, викликають операції Entity Framework Core та повертають DTO у форматі JSON.
-
-### Рівень доступу до даних
-Entity Framework Core виконує запити до PostgreSQL через провайдер Npgsql. `AppDbContext` описує таблиці та зв'язки між сутностями.
-
-### База даних
-PostgreSQL зберігає тести, запитання та варіанти відповідей. Docker volume використовується для збереження даних між перезапусками контейнера бази даних.
-
-## 3. Схема взаємодії
+## 2. C4 Container Diagram
 
 ```mermaid
-flowchart TD
-    U[Користувач] --> F[Frontend: Vue 3 + TypeScript]
-    F -->|HTTP / JSON| C[ASP.NET Core REST API]
-    C --> D[DTO та контролери]
-    D --> E[Entity Framework Core]
-    E -->|Npgsql| P[(PostgreSQL)]
-    C --> S[Swagger / OpenAPI]
-    P --- V[Docker volume]
+flowchart TB
+    Student["Студент"]
+    Organizer["Організатор"]
+
+    subgraph OnlineTesting["OnlineTesting"]
+        Frontend["Frontend<br/>Vue 3 + TypeScript<br/>Nginx"]
+        API["Backend API<br/>ASP.NET Core 10<br/>EF Core"]
+        DB[("PostgreSQL 17<br/>Tests, Questions,<br/>TestAttempts, StudentAnswers")]
+    end
+
+    Student -->|"Проходить тести"| Frontend
+    Organizer -->|"Керує тестами"| Frontend
+    Frontend -->|"HTTP / REST / JSON"| API
+    API -->|"EF Core / SQL"| DB
 ```
 
-## 4. Основний сценарій запиту
+### Пояснення
 
-1. Користувач виконує дію в інтерфейсі.
-2. Frontend надсилає HTTP-запит до відповідного endpoint.
-3. Контролер backend обробляє запит і перевіряє вхідні дані.
-4. Entity Framework Core виконує операцію з PostgreSQL.
-5. API повертає HTTP-статус і, за потреби, JSON-відповідь.
-6. Frontend оновлює відображення даних.
+**Frontend** відображає інтерфейс користувача та надсилає HTTP-запити до API.
+
+**Backend API** обробляє бізнес-логіку: керування тестами, створення спроб, збереження відповідей та обчислення результатів.
+
+**PostgreSQL** зберігає тести, запитання, варіанти відповідей, спроби проходження та відповіді студентів.
+
+Nginx обслуговує frontend і передає запити `/api/` до backend-контейнера.
+
+## 3. C4 Component Diagram — модуль проходження тестів
+
+```mermaid
+flowchart TB
+    StudentUI["StudentTestView.vue<br/>Інтерфейс студента"]
+    ApiService["api.ts<br/>HTTP-запити"]
+
+    subgraph Backend["ASP.NET Core API"]
+        AttemptsController["AttemptsController<br/>REST endpoints"]
+        Scoring["Логіка оцінювання<br/>Перевірка відповідей і Score"]
+        EF["EF Core DbContext<br/>Доступ до сутностей"]
+    end
+
+    Database[("PostgreSQL<br/>TestAttempts<br/>StudentAnswers")]
+
+    StudentUI -->|"Дії студента"| ApiService
+    ApiService -->|"HTTP + X-Attempt-Token"| AttemptsController
+    AttemptsController -->|"Завершення спроби"| Scoring
+    AttemptsController -->|"Читання / запис"| EF
+    Scoring -->|"Дані відповідей і балів"| EF
+    EF -->|"SQL"| Database
+```
+
+### Компоненти модуля учасника №2
+
+**StudentTestView.vue** — інтерфейс проходження тесту, вибору відповідей і перегляду результату.
+
+**api.ts** — клієнтські функції для звернення до REST API.
+
+**AttemptsController** — створення спроб, перевірка токенів, збереження відповідей, завершення тестування та отримання результатів.
+
+**Логіка оцінювання** — обчислення набраних балів за правильними відповідями. Це логічний компонент усередині backend, а не обов'язково окремий клас.
+
+**EF Core DbContext** — доступ до таблиць PostgreSQL через сутності.
+
+## 4. Основний сценарій взаємодії
+
+```mermaid
+sequenceDiagram
+    actor Student as Студент
+    participant UI as Vue Frontend
+    participant API as ASP.NET Core API
+    participant DB as PostgreSQL
+
+    Student->>UI: Почати тест
+    UI->>API: POST /api/tests/{testId}/attempts
+    API->>DB: Створити TestAttempt
+    DB-->>API: Збережена спроба
+    API-->>UI: attemptId, token, запитання
+
+    Student->>UI: Вибрати відповідь
+    UI->>API: PUT /api/attempts/{id}/answers
+    API->>DB: Зберегти StudentAnswer
+    API-->>UI: Підтвердження
+
+    Student->>UI: Завершити тест
+    UI->>API: POST /api/attempts/{id}/submit
+    API->>DB: Прочитати відповіді та правильні варіанти
+    API->>API: Обчислити Score
+    API->>DB: Зберегти результат
+    API-->>UI: Результат тесту
+    UI-->>Student: Показати бали
+```
 
 ## 5. Розгортання
 
-Docker Compose запускає API та PostgreSQL як окремі сервіси. API доступний на локальному порту 8080, PostgreSQL — на порту 5432. Усередині Docker-мережі API звертається до бази даних за ім'ям сервісу `db`.
+Для запуску використовується команда:
 
-Параметри підключення задаються конфігурацією середовища. Паролі не повинні зберігатися у відкритому вигляді в репозиторії. Для локального запуску використовується файл `.env`, який має бути виключений із Git, а `.env.example` містить лише приклад параметрів без реальних секретів.
+```powershell
+docker compose up -d --build
+```
 
-## 6. Перевірка працездатності
+Основні адреси:
+- Frontend: `http://localhost:8081`
+- Backend API: `http://localhost:8080`
+- PostgreSQL: `localhost:5432`
 
-- `GET /health` — перевірка доступності API.
-- Swagger UI — інтерактивна документація REST API.
-- `npm run build` — перевірка типів і production-збірка frontend.
-- `dotnet build backend/OnlineTesting.Api` — компіляція backend.
+Контейнери використовують спільну Docker-мережу `testing-network`.
+
+Дані PostgreSQL зберігаються в Docker volume `postgres_data`.
+
+## 6. Архітектурні рішення
+
+1. **Поділ frontend і backend.** Дозволяє незалежно розробляти інтерфейс і серверну логіку.
+2. **REST API.** Забезпечує зрозумілу взаємодію через HTTP та JSON.
+3. **Entity Framework Core.** Спрощує роботу з даними та підтримує міграції структури БД.
+4. **PostgreSQL.** Забезпечує реляційне зберігання пов'язаних сутностей.
+5. **Docker Compose.** Дозволяє відтворити середовище запуску однією командою.
+6. **Токен доступу до спроби.** Обмежує доступ до відповідей і результатів конкретної спроби.
+
+## 7. Відповідальність учасника №2
+
+Учасник №2 відповідає за компонент проходження тестів, включно з REST endpoints, сутностями TestAttempt і StudentAnswer, логікою оцінювання, студентським інтерфейсом та перевіркою інтеграції з базою даних.
+
+Інші компоненти системи відображені на загальній діаграмі для розуміння взаємодії між модулями.

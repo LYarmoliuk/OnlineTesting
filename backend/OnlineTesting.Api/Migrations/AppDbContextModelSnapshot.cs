@@ -163,6 +163,9 @@ namespace OnlineTesting.Api.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("character varying(20)");
 
+                    b.Property<string>("StudentId")
+                        .HasColumnType("text");
+
                     b.Property<int>("TestId")
                         .HasColumnType("integer");
 

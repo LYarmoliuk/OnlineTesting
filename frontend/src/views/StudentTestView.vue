@@ -173,9 +173,13 @@ function messageOf(e: unknown): string {
     <section v-if="result" class="result-card">
       <h2>Тест завершено!</h2>
       <p class="result-title">{{ result.testTitle }}</p>
-      <p class="score">
-        {{ result.score }} / {{ result.maxScore }} балів
-      </p>
+<p class="score">
+  {{
+    result.maxScore > 0
+      ? Math.round((result.score / result.maxScore) * 100)
+      : 0
+  }}% від максимальної кількості балів
+</p>
       <p>
         Відповіді надано: {{ result.answeredQuestions }}
         із {{ result.totalQuestions }}

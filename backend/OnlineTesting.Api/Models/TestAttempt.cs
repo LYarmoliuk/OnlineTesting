@@ -3,7 +3,7 @@
 public class TestAttempt
 {
     public int Id { get; set; }
-
+    public string? StudentId { get; set; }
     public int TestId { get; set; }
 
     // Тимчасовий токен доступу до спроби, не автентифікація студента.
