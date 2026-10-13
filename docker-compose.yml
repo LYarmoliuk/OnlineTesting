@@ -1,0 +1,41 @@
+
+services:
+  api:
+    build:
+      context: ./backend/OnlineTesting.Api
+    ports:
+      - "8080:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_HTTP_PORTS: 8080
+      ConnectionStrings__DefaultConnection: "Host=db;Port=5432;Database=online_testing;Username=app;Password=${DB_PASSWORD}"
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - testing-network
+
+  db:
+    image: postgres:17
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: online_testing
+      POSTGRES_USER: app
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U app -d online_testing"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    networks:
+      - testing-network
+
+networks:
+  testing-network:
+
+volumes:
+  postgres_data:

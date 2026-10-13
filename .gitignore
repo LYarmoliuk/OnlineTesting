@@ -1,0 +1,26 @@
+
+# Secrets
+.env
+.env.*
+!.env.example
+
+# .NET
+**/bin/
+**/obj/
+**/TestResults/
+*.user
+*.suo
+
+# Node
+frontend/node_modules/
+frontend/dist/
+frontend/coverage/
+
+# IDE
+.vscode/*
+!.vscode/extensions.json
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
