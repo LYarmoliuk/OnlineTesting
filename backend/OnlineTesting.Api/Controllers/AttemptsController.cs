@@ -196,11 +196,8 @@ public sealed class AttemptsController(AppDbContext dbContext)
         SaveStudentAnswerDto dto,
         CancellationToken cancellationToken)
     {
-        var attempt = await dbContext.TestAttempts
-            .Include(a => a.Answers)
-            .FirstOrDefaultAsync(
-                a => a.Id == attemptId && a.AccessToken == accessToken,
-                cancellationToken);
+        await using var transaction = await dbContext.Database.BeginTransactionAsync(cancellationToken);
+        var attempt = await LockAttemptAsync(attemptId, accessToken, cancellationToken);
 
         if (attempt is null)
             return NotFound("Спробу не знайдено.");
@@ -224,8 +221,9 @@ public sealed class AttemptsController(AppDbContext dbContext)
             return BadRequest(
                 "Вибраний варіант не належить цьому запитанню.");
 
-        var answer = attempt.Answers.FirstOrDefault(
-            a => a.QuestionId == dto.QuestionId);
+        var answer = await dbContext.StudentAnswers.FirstOrDefaultAsync(
+            a => a.TestAttemptId == attempt.Id && a.QuestionId == dto.QuestionId,
+            cancellationToken);
 
         if (answer is null)
         {
@@ -246,6 +244,7 @@ public sealed class AttemptsController(AppDbContext dbContext)
         }
 
         await dbContext.SaveChangesAsync(cancellationToken);
+        await transaction.CommitAsync(cancellationToken);
 
         return NoContent();
     }
@@ -256,6 +255,12 @@ public sealed class AttemptsController(AppDbContext dbContext)
         [FromHeader(Name = TokenHeader)] Guid accessToken,
         CancellationToken cancellationToken)
     {
+        await using var transaction = await dbContext.Database.BeginTransactionAsync(cancellationToken);
+        var lockedAttempt = await LockAttemptAsync(attemptId, accessToken, cancellationToken);
+
+        if (lockedAttempt is null)
+            return NotFound("Спробу не знайдено.");
+
         var attempt = await dbContext.TestAttempts
             .Include(a => a.Test)
                 .ThenInclude(t => t.Questions)
@@ -267,11 +272,8 @@ public sealed class AttemptsController(AppDbContext dbContext)
                 a => a.Id == attemptId && a.AccessToken == accessToken,
                 cancellationToken);
 
-        if (attempt is null)
-            return NotFound("Спробу не знайдено.");
-
         // Повторне надсилання не змінює вже збережений результат.
-        if (attempt.Status != TestAttemptStatus.Completed)
+        if (attempt!.Status != TestAttemptStatus.Completed)
         {
             attempt.Score = attempt.Answers
                 .Where(a => a.SelectedOption.IsCorrect)
@@ -283,6 +285,7 @@ public sealed class AttemptsController(AppDbContext dbContext)
             await dbContext.SaveChangesAsync(cancellationToken);
         }
 
+        await transaction.CommitAsync(cancellationToken);
         return Ok(BuildResult(attempt));
     }
 
@@ -323,4 +326,14 @@ public sealed class AttemptsController(AppDbContext dbContext)
             CompletedAt = attempt.CompletedAt
         };
     }
+
+    // The database row lock serializes answer saves and submission across all API instances.
+    private async Task<TestAttempt?> LockAttemptAsync(
+        int attemptId,
+        Guid accessToken,
+        CancellationToken cancellationToken) =>
+        (await dbContext.TestAttempts
+            .FromSqlInterpolated($"SELECT * FROM \"TestAttempts\" WHERE \"Id\" = {attemptId} AND \"AccessToken\" = {accessToken} FOR UPDATE")
+            .AsNoTracking()
+            .ToListAsync(cancellationToken)).SingleOrDefault();
 }
