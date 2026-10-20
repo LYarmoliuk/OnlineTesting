@@ -25,6 +25,20 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 var app = builder.Build();
 
+if (args.Contains("--migrate", StringComparer.Ordinal))
+{
+    using var scope = app.Services.CreateScope();
+    await scope.ServiceProvider.GetRequiredService<AppDbContext>().Database.MigrateAsync();
+    return;
+}
+
+var instanceId = Environment.GetEnvironmentVariable("INSTANCE_ID") ?? Environment.MachineName;
+app.Use(async (context, next) =>
+{
+    context.Response.Headers["X-Instance-ID"] = instanceId;
+    await next(context);
+});
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -36,7 +50,8 @@ app.UseCors("VueFrontend");
 app.MapGet("/health", () => Results.Ok(new
 {
     status = "healthy",
-    service = "OnlineTesting.Api"
+    service = "OnlineTesting.Api",
+    instanceId
 }));
 
 app.MapControllers();
