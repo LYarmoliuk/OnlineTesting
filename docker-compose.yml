@@ -1,6 +1,18 @@
 
 services:
-  api:
+  migrate:
+    build:
+      context: ./backend/OnlineTesting.Api
+    command: ["--migrate"]
+    environment:
+      ConnectionStrings__DefaultConnection: "Host=db;Port=5432;Database=online_testing;Username=app;Password=${DB_PASSWORD}"
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - testing-network
+
+  api_a:
     build:
       context: ./backend/OnlineTesting.Api
     ports:
@@ -8,10 +20,27 @@ services:
     environment:
       ASPNETCORE_ENVIRONMENT: Development
       ASPNETCORE_HTTP_PORTS: 8080
+      INSTANCE_ID: api-a
       ConnectionStrings__DefaultConnection: "Host=db;Port=5432;Database=online_testing;Username=app;Password=${DB_PASSWORD}"
     depends_on:
-      db:
-        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    networks:
+      - testing-network
+
+  api_b:
+    build:
+      context: ./backend/OnlineTesting.Api
+    ports:
+      - "8082:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_HTTP_PORTS: 8080
+      INSTANCE_ID: api-b
+      ConnectionStrings__DefaultConnection: "Host=db;Port=5432;Database=online_testing;Username=app;Password=${DB_PASSWORD}"
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
     networks:
       - testing-network
 
@@ -40,7 +69,8 @@ services:
     ports:
       - "8081:80"
     depends_on:
-      - api
+      - api_a
+      - api_b
     networks:
       - testing-network
 
