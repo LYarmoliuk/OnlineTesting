@@ -47,33 +47,12 @@ if (app.Environment.IsDevelopment())
 
 app.UseCors("VueFrontend");
 
-app.MapGet("/health", async (AppDbContext db, CancellationToken cancellationToken) =>
+app.MapGet("/health", () => Results.Ok(new
 {
-    using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-    timeout.CancelAfter(TimeSpan.FromSeconds(2));
-
-    bool databaseReady;
-    try
-    {
-        databaseReady = await db.Database.CanConnectAsync(timeout.Token);
-    }
-    catch (Exception)
-    {
-        databaseReady = false;
-    }
-
-    var report = new
-    {
-        status = databaseReady ? "healthy" : "unavailable",
-        service = "OnlineTesting.Api",
-        instanceId,
-        database = databaseReady ? "connected" : "unavailable"
-    };
-
-    return databaseReady
-        ? Results.Ok(report)
-        : Results.Json(report, statusCode: StatusCodes.Status503ServiceUnavailable);
-});
+    status = "healthy",
+    service = "OnlineTesting.Api",
+    instanceId
+}));
 
 app.MapControllers();
 

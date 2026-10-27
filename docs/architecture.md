@@ -4,9 +4,9 @@
 
 OnlineTesting — вебсистема для створення та проходження онлайн-тестів.
 
-Система складається з єдиного зовнішнього входу, трьох однакових API-контейнерів, одноразового контейнера міграцій та PostgreSQL:
-- Frontend і балансувальник — Vue 3 + TypeScript, які обслуговує Nginx на одному зовнішньому порту.
-- Backend API — ASP.NET Core 10, вузли `api_a`, `api_b` і `api_c` у приватній Docker-мережі.
+Система складається з frontend, двох однакових API-контейнерів, одноразового контейнера міграцій та PostgreSQL:
+- Frontend — Vue 3 + TypeScript.
+- Backend API — ASP.NET Core 10, вузли `api_a` і `api_b`.
 - Migration — застосування EF Core міграцій перед стартом API.
 - Database — PostgreSQL 17.
 
@@ -20,10 +20,9 @@ flowchart TB
     Organizer["Організатор"]
 
     subgraph OnlineTesting["OnlineTesting"]
-        Frontend["Єдиний зовнішній вхід :8081<br/>Vue SPA + Nginx Load Balancer"]
+        Frontend["Frontend<br/>Vue 3 + TypeScript<br/>Nginx"]
         APIA["API api_a<br/>ASP.NET Core 10<br/>EF Core"]
         APIB["API api_b<br/>ASP.NET Core 10<br/>EF Core"]
-        APIC["API api_c<br/>ASP.NET Core 10<br/>EF Core"]
         Migration["migrate<br/>EF Core migrations"]
         DB[("PostgreSQL 17<br/>Tests, Questions,<br/>TestAttempts, StudentAnswers")]
     end
@@ -32,10 +31,8 @@ flowchart TB
     Organizer -->|"Керує тестами"| Frontend
     Frontend -->|"Nginx /api без sticky sessions"| APIA
     Frontend -->|"Nginx /api без sticky sessions"| APIB
-    Frontend -->|"Nginx /api без sticky sessions"| APIC
     APIA -->|"EF Core / SQL"| DB
     APIB -->|"EF Core / SQL"| DB
-    APIC -->|"EF Core / SQL"| DB
     Migration -->|"Схема БД"| DB
 ```
 
@@ -43,11 +40,11 @@ flowchart TB
 
 **Frontend** відображає інтерфейс користувача та надсилає HTTP-запити до API.
 
-**Backend API** обробляє бізнес-логіку на трьох взаємозамінних вузлах. Кожен вузол повертає заголовок `X-Instance-ID`.
+**Backend API** обробляє бізнес-логіку на двох взаємозамінних вузлах. Кожен вузол повертає заголовок `X-Instance-ID`.
 
 **PostgreSQL** зберігає тести, запитання, варіанти відповідей, спроби проходження та відповіді студентів.
 
-Nginx обслуговує frontend і розподіляє запити `/api/` між `api_a`, `api_b` та `api_c`. У вузлів немає опублікованих портів; усі використовують одну БД.
+Nginx обслуговує frontend і розподіляє запити `/api/` між `api_a` та `api_b`. Обидва вузли використовують одну БД.
 
 ## 3. C4 Component Diagram — модуль проходження тестів
 
@@ -68,30 +65,19 @@ flowchart TB
         EFB["Scoped AppDbContext<br/>транзакція + row lock"]
     end
 
-    subgraph BackendC["API instance api_c"]
-        ControllerC["AttemptsController<br/>REST + токен"]
-        ScoringC["Оцінювання"]
-        EFC["Scoped AppDbContext<br/>транзакція + row lock"]
-    end
-
     Database[("PostgreSQL<br/>TestAttempts<br/>StudentAnswers")]
 
     StudentUI -->|"Дії студента"| ApiService
     ApiService -->|"Nginx /api + X-Attempt-Token"| ControllerA
     ApiService -->|"Nginx /api + X-Attempt-Token"| ControllerB
-    ApiService -->|"Nginx /api + X-Attempt-Token"| ControllerC
     ControllerA --> ScoringA
     ControllerB --> ScoringB
-    ControllerC --> ScoringC
     ControllerA --> EFA
     ControllerB --> EFB
-    ControllerC --> EFC
     ScoringA --> EFA
     ScoringB --> EFB
-    ScoringC --> EFC
     EFA -->|"SQL"| Database
     EFB -->|"SQL"| Database
-    EFC -->|"SQL"| Database
 ```
 
 ### Компоненти модуля учасника №2
@@ -151,9 +137,9 @@ docker compose up -d --build
 
 Основні адреси:
 - Frontend: `http://localhost:8081`
-- API через балансувальник: `http://localhost:8081/api/`
-- Readiness через балансувальник: `http://localhost:8081/health`
-- API-вузли й PostgreSQL: тільки в приватній Docker-мережі.
+- Backend API: `http://localhost:8080`
+- Другий API-вузол: `http://localhost:8082`
+- PostgreSQL: `localhost:5432`
 
 Контейнери використовують спільну Docker-мережу `testing-network`.
 
@@ -168,15 +154,9 @@ docker compose up -d --build
 5. **Docker Compose.** Дозволяє відтворити середовище запуску однією командою.
 6. **Токен доступу до спроби.** Обмежує доступ до відповідей і результатів конкретної спроби.
 7. **Транзакції та row lock PostgreSQL.** Узгоджують збереження відповіді й завершення спроби між процесами та забезпечують rollback незавершеної операції при втраті вузла.
-8. **Nginx як одна точка входу.** Балансує Round Robin за замовчуванням; пасивно виключає вузол після помилки або тайм-ауту та повторює безпечні запити на інший вузол. Активні upstream health checks у звичайному Nginx недоступні; readiness endpoint перевіряє з'єднання з БД.
-9. **Балансувальник — Single Point of Failure.** У лабораторному Compose він один. Для промислової високої доступності потрібні щонайменше два балансувальники та механізм перемикання, наприклад VRRP/Keepalived.
 
 ## 7. Розподіл роботи лабораторної 2
 
 Учасник А виконав аудит стану та забезпечив узгоджене збереження відповідей і завершення спроб через транзакції та блокування рядка в PostgreSQL (пункти 2.1–2.3).
 
 Учасник Б додав два API-вузли, ідентифікацію `X-Instance-ID`, балансування Nginx, сценарій втрати вузла та оновив архітектурні схеми (пункти 2.4–2.6). Усі компоненти вже об'єднано в поточній конфігурації.
-
-## 8. Лабораторна 3 — горизонтальне масштабування
-
-Студент 1 розширив пул до трьох вузлів, залишив тільки один опублікований порт `8081`, додав readiness перевірку PostgreSQL і пасивне виключення несправного вузла в Nginx. Студент 2 додав конфігурацію Least Connections, контрольовану затримку `api_b`, вимірювання Round Robin та Least Connections і експеримент для 1, 2 та 3 вузлів. Детальні результати наведено в README.
