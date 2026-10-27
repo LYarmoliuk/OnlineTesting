@@ -15,8 +15,6 @@ services:
   api_a:
     build:
       context: ./backend/OnlineTesting.Api
-    ports:
-      - "8080:8080"
     environment:
       ASPNETCORE_ENVIRONMENT: Development
       ASPNETCORE_HTTP_PORTS: 8080
@@ -31,12 +29,25 @@ services:
   api_b:
     build:
       context: ./backend/OnlineTesting.Api
-    ports:
-      - "8082:8080"
     environment:
       ASPNETCORE_ENVIRONMENT: Development
       ASPNETCORE_HTTP_PORTS: 8080
       INSTANCE_ID: api-b
+      LAB3_DELAY_MS: ${LAB3_DELAY_MS:-0}
+      ConnectionStrings__DefaultConnection: "Host=db;Port=5432;Database=online_testing;Username=app;Password=${DB_PASSWORD}"
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    networks:
+      - testing-network
+
+  api_c:
+    build:
+      context: ./backend/OnlineTesting.Api
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_HTTP_PORTS: 8080
+      INSTANCE_ID: api-c
       ConnectionStrings__DefaultConnection: "Host=db;Port=5432;Database=online_testing;Username=app;Password=${DB_PASSWORD}"
     depends_on:
       migrate:
@@ -51,8 +62,6 @@ services:
       POSTGRES_DB: online_testing
       POSTGRES_USER: app
       POSTGRES_PASSWORD: ${DB_PASSWORD}
-    ports:
-      - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -67,10 +76,11 @@ services:
     build:
       context: ./frontend
     ports:
-      - "8081:80"
+      - "${LAB3_PUBLIC_PORT:-8081}:80"
     depends_on:
       - api_a
       - api_b
+      - api_c
     networks:
       - testing-network
 
