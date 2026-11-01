@@ -34,17 +34,50 @@ foreach ($name in @('api-a', 'api-b', 'api-c')) {
 }
 Write-Host "Three instances through one public port: $((($seen | Group-Object | ForEach-Object { "$($_.Name)=$($_.Count)" }) -join ', '))"
 
-docker compose kill api_b | Out-Null
-if ($LASTEXITCODE -ne 0) { throw 'Could not stop api_b.' }
+$projectRoot = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
+$killer = Start-Job -ArgumentList $projectRoot -ScriptBlock {
+    param($root)
+    Set-Location $root
+    Start-Sleep -Milliseconds 800
+    docker compose kill api_b 2>&1 | Out-Null
+    if ($LASTEXITCODE -ne 0) { throw 'Could not stop api_b.' }
+    [datetime]::UtcNow
+}
 try {
-    Start-Sleep -Seconds 4
-    $afterFailure = 1..30 | ForEach-Object { Request '/api/tests' }
-    if ('api-b' -in $afterFailure) {
-        throw 'A request was routed to the stopped instance.'
+    $traffic = @(1..400 | ForEach-Object -Parallel {
+        $started = [datetime]::UtcNow
+        try {
+            $response = Invoke-WebRequest -Uri "$using:BaseUrl/api/tests" -TimeoutSec 10 -SkipHttpErrorCheck
+            [pscustomobject]@{
+                Started = $started
+                Status = [int]$response.StatusCode
+                Instance = [string]$response.Headers['X-Instance-ID']
+            }
+        }
+        catch {
+            [pscustomobject]@{ Started = $started; Status = 0; Instance = '' }
+        }
+    } -ThrottleLimit 24)
+    $killer | Wait-Job | Out-Null
+    if ($killer.State -ne 'Completed') { throw "Node stop failed: $(($killer.ChildJobs[0].JobStateInfo.Reason))" }
+    $killedAt = Receive-Job $killer
+    $before = @($traffic | Where-Object { $_.Started -lt $killedAt })
+    $after = @($traffic | Where-Object { $_.Started -ge $killedAt })
+    if ($before.Count -eq 0 -or $after.Count -eq 0) {
+        throw 'The node stop did not occur during the request stream.'
     }
-    Write-Host 'Thirty new GET requests stayed on healthy instances without 5xx.'
+    $failures = @($traffic | Where-Object { $_.Status -ne 200 -or $_.Instance -notin @('api-a', 'api-b', 'api-c') })
+    if ($failures.Count -gt 0) {
+        throw "During node stop, $($failures.Count)/$($traffic.Count) requests failed."
+    }
+    if (@($after | Where-Object Instance -eq 'api-b').Count -gt 0) {
+        throw 'Requests started after api_b stopped were routed to it.'
+    }
+    Write-Host "Live failover: $($traffic.Count) requests, $($before.Count) started before stop, $($after.Count) after stop, 0 failures."
 }
 finally {
+    $killer | Stop-Job -ErrorAction SilentlyContinue
+    $killer | Remove-Job -Force -ErrorAction SilentlyContinue
     docker compose start api_b | Out-Null
     if ($LASTEXITCODE -ne 0) { throw 'Could not restore api_b.' }
 }
