@@ -1,6 +1,7 @@
 
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using OnlineTesting.Api.Caching;
 using OnlineTesting.Api.Data;
 using OnlineTesting.Api.DTOs;
 using OnlineTesting.Api.Models;
@@ -9,27 +10,32 @@ namespace OnlineTesting.Api.Controllers;
 
 [ApiController]
 [Route("api/tests")]
-public sealed class TestsController(AppDbContext dbContext)
+public sealed class TestsController(AppDbContext dbContext, CacheAsideService cache)
     : ControllerBase
 {
     [HttpGet]
     public async Task<ActionResult<IEnumerable<TestResponseDto>>> GetTests(
         CancellationToken cancellationToken)
     {
-        var tests = await dbContext.Tests
-            .AsNoTracking()
-            .OrderByDescending(test => test.CreatedAt)
-            .Select(test => new TestResponseDto
-            {
-                Id = test.Id,
-                Title = test.Title,
-                Description = test.Description,
-                IsPublished = test.IsPublished,
-                CreatedAt = test.CreatedAt
-            })
-            .ToListAsync(cancellationToken);
+        var result = await cache.ReadAsync(
+            CacheKeys.TestsList,
+            TimeSpan.FromSeconds(30),
+            token => dbContext.Tests
+                .AsNoTracking()
+                .OrderByDescending(test => test.CreatedAt)
+                .Select(test => new TestResponseDto
+                {
+                    Id = test.Id,
+                    Title = test.Title,
+                    Description = test.Description,
+                    IsPublished = test.IsPublished,
+                    CreatedAt = test.CreatedAt
+                })
+                .ToListAsync(token),
+            cancellationToken);
 
-        return Ok(tests);
+        Response.Headers["X-Cache"] = result.Status;
+        return Ok(result.Value);
     }
 
     [HttpGet("{id:int}")]
