@@ -1,5 +1,6 @@
 
 using Microsoft.EntityFrameworkCore;
+using OnlineTesting.Api.Caching;
 using OnlineTesting.Api.Data;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -19,9 +20,17 @@ builder.Services.AddCors(options =>
     });
 });
 
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseNpgsql(
-        builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddStackExchangeRedisCache(options =>
+{
+    options.Configuration = builder.Configuration["Cache:RedisConnection"]
+        ?? "redis:6379,abortConnect=false,connectTimeout=1000,syncTimeout=1000";
+    options.InstanceName = "online-testing:lab4:";
+});
+builder.Services.AddScoped<CacheAsideService>();
+builder.Services.AddScoped<CacheInvalidationInterceptor>();
+builder.Services.AddDbContext<AppDbContext>((services, options) =>
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))
+        .AddInterceptors(services.GetRequiredService<CacheInvalidationInterceptor>()));
 
 var app = builder.Build();
 
