@@ -1,0 +1,141 @@
+{
+  "timestamp": "2026-11-01T22:58:35.0057614+02:00",
+  "project": "lab4both",
+  "path": "/api/tests/2/questions",
+  "cacheKey": "questions:test:2:v1",
+  "pairs": 10,
+  "coldAverageMs": 16.21,
+  "hotAverageMs": 7.8,
+  "samples": [
+    {
+      "pair": 1,
+      "cold": {
+        "cache": "MISS",
+        "instance": "api-c",
+        "durationMs": 58.91
+      },
+      "hot": {
+        "cache": "HIT",
+        "instance": "api-b",
+        "durationMs": 16.73
+      }
+    },
+    {
+      "pair": 2,
+      "cold": {
+        "cache": "MISS",
+        "instance": "api-a",
+        "durationMs": 10.01
+      },
+      "hot": {
+        "cache": "HIT",
+        "instance": "api-c",
+        "durationMs": 6.2
+      }
+    },
+    {
+      "pair": 3,
+      "cold": {
+        "cache": "MISS",
+        "instance": "api-b",
+        "durationMs": 18.75
+      },
+      "hot": {
+        "cache": "HIT",
+        "instance": "api-a",
+        "durationMs": 9.38
+      }
+    },
+    {
+      "pair": 4,
+      "cold": {
+        "cache": "MISS",
+        "instance": "api-c",
+        "durationMs": 14.99
+      },
+      "hot": {
+        "cache": "HIT",
+        "instance": "api-b",
+        "durationMs": 7.09
+      }
+    },
+    {
+      "pair": 5,
+      "cold": {
+        "cache": "MISS",
+        "instance": "api-a",
+        "durationMs": 9.07
+      },
+      "hot": {
+        "cache": "HIT",
+        "instance": "api-c",
+        "durationMs": 6.76
+      }
+    },
+    {
+      "pair": 6,
+      "cold": {
+        "cache": "MISS",
+        "instance": "api-b",
+        "durationMs": 8.94
+      },
+      "hot": {
+        "cache": "HIT",
+        "instance": "api-a",
+        "durationMs": 5.78
+      }
+    },
+    {
+      "pair": 7,
+      "cold": {
+        "cache": "MISS",
+        "instance": "api-c",
+        "durationMs": 11.86
+      },
+      "hot": {
+        "cache": "HIT",
+        "instance": "api-b",
+        "durationMs": 7.56
+      }
+    },
+    {
+      "pair": 8,
+      "cold": {
+        "cache": "MISS",
+        "instance": "api-a",
+        "durationMs": 8.36
+      },
+      "hot": {
+        "cache": "HIT",
+        "instance": "api-c",
+        "durationMs": 5.79
+      }
+    },
+    {
+      "pair": 9,
+      "cold": {
+        "cache": "MISS",
+        "instance": "api-b",
+        "durationMs": 11.86
+      },
+      "hot": {
+        "cache": "HIT",
+        "instance": "api-a",
+        "durationMs": 7.19
+      }
+    },
+    {
+      "pair": 10,
+      "cold": {
+        "cache": "MISS",
+        "instance": "api-c",
+        "durationMs": 9.3
+      },
+      "hot": {
+        "cache": "HIT",
+        "instance": "api-b",
+        "durationMs": 5.56
+      }
+    }
+  ]
+}
