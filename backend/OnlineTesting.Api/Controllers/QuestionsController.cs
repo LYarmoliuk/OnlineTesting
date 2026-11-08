@@ -2,6 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using OnlineTesting.Api.Caching;
 using OnlineTesting.Api.Data;
 using OnlineTesting.Api.Models;
 
@@ -68,9 +69,13 @@ public sealed class AnswerOptionResponseDto
     public bool IsCorrect { get; set; }
 }
 
+public sealed record QuestionListCachePayload(
+    bool TestExists,
+    List<QuestionResponseDto> Questions);
+
 [ApiController]
 [Route("api")]
-public sealed class QuestionsController(AppDbContext dbContext)
+public sealed class QuestionsController(AppDbContext dbContext, CacheAsideService cache)
     : ControllerBase
 {
     [HttpGet("tests/{testId:int}/questions")]
@@ -78,27 +83,37 @@ public sealed class QuestionsController(AppDbContext dbContext)
         int testId,
         CancellationToken cancellationToken)
     {
-        var testExists = await dbContext.Tests
-            .AnyAsync(test => test.Id == testId, cancellationToken);
-
-        if (!testExists)
-            return NotFound("Тест не знайдено.");
-
-        var questions = await dbContext.Questions
-            .AsNoTracking()
-            .Where(question => question.TestId == testId)
-            .OrderBy(question => question.Order)
-            .Select(question => new QuestionResponseDto
+        var result = await cache.ReadAsync(
+            CacheKeys.QuestionsForTest(testId),
+            TimeSpan.FromSeconds(60),
+            async token =>
             {
-                Id = question.Id,
-                TestId = question.TestId,
-                Text = question.Text,
-                Order = question.Order,
-                Points = question.Points
-            })
-            .ToListAsync(cancellationToken);
+                var testExists = await dbContext.Tests
+                    .AnyAsync(test => test.Id == testId, token);
+                if (!testExists)
+                    return new QuestionListCachePayload(false, []);
 
-        return Ok(questions);
+                var questions = await dbContext.Questions
+                    .AsNoTracking()
+                    .Where(question => question.TestId == testId)
+                    .OrderBy(question => question.Order)
+                    .Select(question => new QuestionResponseDto
+                    {
+                        Id = question.Id,
+                        TestId = question.TestId,
+                        Text = question.Text,
+                        Order = question.Order,
+                        Points = question.Points
+                    })
+                    .ToListAsync(token);
+                return new QuestionListCachePayload(true, questions);
+            },
+            cancellationToken);
+
+        Response.Headers["X-Cache"] = result.Status;
+        return result.Value.TestExists
+            ? Ok(result.Value.Questions)
+            : NotFound("Тест не знайдено.");
     }
 
     [HttpPost("tests/{testId:int}/questions")]

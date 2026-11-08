@@ -4,11 +4,12 @@
 
 OnlineTesting — вебсистема для створення та проходження онлайн-тестів.
 
-Система складається з єдиного зовнішнього входу, трьох однакових API-контейнерів, одноразового контейнера міграцій та PostgreSQL:
+Система складається з єдиного зовнішнього входу, трьох однакових API-контейнерів, одноразового контейнера міграцій, PostgreSQL та Redis:
 - Frontend і балансувальник — Vue 3 + TypeScript, які обслуговує Nginx на одному зовнішньому порту.
 - Backend API — ASP.NET Core 10, вузли `api_a`, `api_b` і `api_c` у приватній Docker-мережі.
 - Migration — застосування EF Core міграцій перед стартом API.
 - Database — PostgreSQL 17.
+- Distributed Cache — Redis 7, спільний для всіх API-вузлів.
 
 Усі компоненти можуть запускатися за допомогою Docker Compose.
 
@@ -26,6 +27,7 @@ flowchart TB
         APIC["API api_c<br/>ASP.NET Core 10<br/>EF Core"]
         Migration["migrate<br/>EF Core migrations"]
         DB[("PostgreSQL 17<br/>Tests, Questions,<br/>TestAttempts, StudentAnswers")]
+        Redis[("Redis 7<br/>Distributed Cache")]
     end
 
     Student -->|"Проходить тести"| Frontend
@@ -36,6 +38,9 @@ flowchart TB
     APIA -->|"EF Core / SQL"| DB
     APIB -->|"EF Core / SQL"| DB
     APIC -->|"EF Core / SQL"| DB
+    APIA -->|"Cache-Aside"| Redis
+    APIB -->|"Cache-Aside"| Redis
+    APIC -->|"Cache-Aside"| Redis
     Migration -->|"Схема БД"| DB
 ```
 
@@ -46,6 +51,8 @@ flowchart TB
 **Backend API** обробляє бізнес-логіку на трьох взаємозамінних вузлах. Кожен вузол повертає заголовок `X-Instance-ID`.
 
 **PostgreSQL** зберігає тести, запитання, варіанти відповідей, спроби проходження та відповіді студентів.
+
+**Redis** зберігає короткоживучі копії списку тестів і списків запитань. На Cache Hit API повертає відповідь без SQL; після запису змінені ключі видаляються. При відмові Redis API читає PostgreSQL напряму.
 
 Nginx обслуговує frontend і розподіляє запити `/api/` між `api_a`, `api_b` та `api_c`. У вузлів немає опублікованих портів; усі використовують одну БД.
 
