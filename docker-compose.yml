@@ -19,6 +19,7 @@ services:
       ASPNETCORE_ENVIRONMENT: Development
       ASPNETCORE_HTTP_PORTS: 8080
       INSTANCE_ID: api-a
+      Cache__RedisConnection: "redis:6379,abortConnect=false,connectTimeout=1000,syncTimeout=1000"
       ConnectionStrings__DefaultConnection: "Host=db;Port=5432;Database=online_testing;Username=app;Password=${DB_PASSWORD}"
     depends_on:
       migrate:
@@ -33,6 +34,7 @@ services:
       ASPNETCORE_ENVIRONMENT: Development
       ASPNETCORE_HTTP_PORTS: 8080
       INSTANCE_ID: api-b
+      Cache__RedisConnection: "redis:6379,abortConnect=false,connectTimeout=1000,syncTimeout=1000"
       LAB3_DELAY_MS: ${LAB3_DELAY_MS:-0}
       ConnectionStrings__DefaultConnection: "Host=db;Port=5432;Database=online_testing;Username=app;Password=${DB_PASSWORD}"
     depends_on:
@@ -48,6 +50,7 @@ services:
       ASPNETCORE_ENVIRONMENT: Development
       ASPNETCORE_HTTP_PORTS: 8080
       INSTANCE_ID: api-c
+      Cache__RedisConnection: "redis:6379,abortConnect=false,connectTimeout=1000,syncTimeout=1000"
       ConnectionStrings__DefaultConnection: "Host=db;Port=5432;Database=online_testing;Username=app;Password=${DB_PASSWORD}"
     depends_on:
       migrate:
@@ -69,6 +72,18 @@ services:
       interval: 5s
       timeout: 3s
       retries: 10
+    networks:
+      - testing-network
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--maxmemory", "128mb", "--maxmemory-policy", "allkeys-lru", "--save", "", "--appendonly", "no"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
     networks:
       - testing-network
 
