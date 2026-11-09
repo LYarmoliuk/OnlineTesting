@@ -42,6 +42,12 @@ try {
     Assert-Response $afterUpdate 200 'MISS'
     if (-not $afterUpdate.Content.Contains('Second version')) { throw 'Updated question was not visible.' }
 
+    $deletedQuestion = Invoke-WebRequest "$BaseUrl/api/questions/$questionId" -Method Delete -SkipHttpErrorCheck
+    Assert-Response $deletedQuestion 204
+    $afterQuestionDelete = Invoke-WebRequest $path -SkipHttpErrorCheck
+    Assert-Response $afterQuestionDelete 200 'MISS'
+    if (@($afterQuestionDelete.Content | ConvertFrom-Json).Count -ne 0) { throw 'Deleted question remained in the list.' }
+
     & docker compose @composeArgs stop redis | Out-Null
     if ($LASTEXITCODE -ne 0) { throw 'Could not stop Redis.' }
     $redisStopped = $true
@@ -56,7 +62,7 @@ try {
     $testId = $null
     $afterDelete = Invoke-WebRequest $path -SkipHttpErrorCheck
     Assert-Response $afterDelete 404 'MISS'
-    Write-Host 'PASS student 2: MISS, HIT, question invalidation, test deletion, Redis fallback.'
+    Write-Host 'PASS student 2: MISS, HIT, question POST/PUT/DELETE invalidation, test deletion, Redis fallback.'
 }
 finally {
     if ($redisStopped) { & docker compose @composeArgs start redis | Out-Null }
