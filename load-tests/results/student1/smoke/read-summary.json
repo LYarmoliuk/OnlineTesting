@@ -1,0 +1,32 @@
+[
+  {
+    "mode": "warm",
+    "vus": 1,
+    "requests": 907,
+    "hitPct": 100.0,
+    "rps": 453.28,
+    "avgMs": 2.07,
+    "p50Ms": 1.92,
+    "p95Ms": 3.08,
+    "p99Ms": 3.57,
+    "errorPct": 0.0,
+    "checkFailures": 0,
+    "targetSeconds": 2,
+    "elapsedSeconds": 2.0
+  },
+  {
+    "mode": "disabled",
+    "vus": 1,
+    "requests": 2,
+    "hitPct": 0.0,
+    "rps": 0.64,
+    "avgMs": 1557.53,
+    "p50Ms": 1557.53,
+    "p95Ms": 1760.51,
+    "p99Ms": 1778.55,
+    "errorPct": 0.0,
+    "checkFailures": 0,
+    "targetSeconds": 2,
+    "elapsedSeconds": 3.12
+  }
+]
