@@ -1,0 +1,50 @@
+{
+  "capturedAt": "2026-11-09T22:15:01.0741227+02:00",
+  "gitCommit": "3cf003bfa72d95d68accde3d7278a6a16acb24a6",
+  "dockerCpus": 12,
+  "dockerMemoryBytes": 8173436928,
+  "generatorLimit": "1 CPU / 512 MiB; separate k6 container on the same Docker host",
+  "sutCpuRamLimits": "No per-service CPU/RAM limits in docker-compose.yml; shared Docker allocation",
+  "apiInstances": 3,
+  "postgresMaxConnections": 100,
+  "npgsqlConnectionPool": "default; no Maximum Pool Size override in docker-compose.yml",
+  "redis": [
+    {
+      "Service": "redis",
+      "State": "running",
+      "Health": "healthy"
+    }
+  ],
+  "services": [
+    {
+      "Service": "api_a",
+      "State": "running",
+      "Health": ""
+    },
+    {
+      "Service": "api_b",
+      "State": "running",
+      "Health": ""
+    },
+    {
+      "Service": "api_c",
+      "State": "running",
+      "Health": ""
+    },
+    {
+      "Service": "db",
+      "State": "running",
+      "Health": "healthy"
+    },
+    {
+      "Service": "frontend",
+      "State": "running",
+      "Health": ""
+    },
+    {
+      "Service": "redis",
+      "State": "running",
+      "Health": "healthy"
+    }
+  ]
+}
