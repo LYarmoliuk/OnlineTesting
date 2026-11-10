@@ -380,3 +380,33 @@ pwsh -NoProfile -File scripts/verify-lab4-student2.ps1
 Перевірка студента 1 показує `MISS → HIT`, інвалідацію після POST/PUT/DELETE тесту й `BYPASS` після зупинки Redis. Перевірка студента 2 показує те саме для POST/PUT/DELETE запитання, 404 після видалення тесту та `BYPASS`. Обидва скрипти запускають Redis знову в блоці завершення. Для демонстрації вручну можна повторити GET і порівняти `X-Cache` та `X-Instance-ID`; Redis має лише внутрішній порт 6379 і не публікується на хост.
 
 Redis має межу пам'яті 128 МБ і політику `allkeys-lru`: за нестачі пам'яті витісняються ключі, до яких найдовше не звертались. `LFU` натомість витісняв би найрідше використовувані ключі. **Expiration** автоматично прибирає ключ після TTL; **invalidation** прибирає його одразу через зміну даних. При одночасному закінченні TTL багатьох ключів можливий *cache avalanche* — хвиля SQL-запитів; допомагає випадковий розкид TTL. При багатьох паралельних `MISS` одного ключа можливий *cache stampede / thundering herd*; допомагають блокування за ключем або single-flight. У цій лабораторній ці два механізми не реалізовано, оскільки вони не потрібні для заданого невеликого навантаження; їх треба додати для продакшн-навантаження.
+
+## 14. Лабораторна робота 5 — Performance Baseline
+
+Сценарії k6 розташовані в `load-tests/`: A — інтенсивне читання каталогу, B — створення й видалення запитань, C — повний цикл проходження тесту з обчисленням результату. Кожен сценарій має warm-up, ступені 10, 25, 50, 100 і 200 VUs, окремі JSON-звіти та метрики RPS, avg, p50, p95, p99 і error rate. Сценарій A порівнює Redis warm та disabled і повернуті PostgreSQL рядки. Сценарії B/C порівнюють один та три API-вузли.
+
+```powershell
+pwsh -NoProfile -File load-tests/capture-environment.ps1
+pwsh -NoProfile -File load-tests/run-read.ps1 -Smoke
+pwsh -NoProfile -File load-tests/run-write-workflow.ps1 -Smoke
+pwsh -NoProfile -File load-tests/run-read.ps1 -StageSeconds 30
+pwsh -NoProfile -File load-tests/run-write-workflow.ps1 -StageSeconds 30
+```
+
+Запускайте скрипти **послідовно**. Генератор k6 працює в окремому Docker-контейнері з лімітом 1 CPU / 512 MiB; фізичний хост із SUT спільний. Конфігурація Docker, кількість API, `max_connections` PostgreSQL і стан Redis записуються в `load-tests/results/student1/environment.json`. Пул Npgsql використовує значення за замовчуванням, оскільки `Maximum Pool Size` не задано. Скрипти відновлюють Redis і всі три API-вузли після експериментів.
+
+Після запуску таблиці та графіки автоматично з'являються в [docs/lab5-read.md](docs/lab5-read.md) і [docs/lab5-write-workflow.md](docs/lab5-write-workflow.md). Сирі дані — в `load-tests/results/student1/` та `load-tests/results/student2/`. Для захисту заповніть картку нижче фактичними вимірюваннями на своєму комп'ютері; не переносіть числа з іншого обладнання.
+
+### System Performance Baseline
+
+| Поле | Значення після вимірювання |
+|---|---|
+| Environment Config | див. `load-tests/results/student1/environment.json` |
+| Stable Throughput | за найбільшим RPS зі стабільними p95 та error rate |
+| Saturation Point | перший ступінь, де RPS вирівнюється, а p95/p99 або errors зростають |
+| p95 / p99 Latency | зі стабільного ступеня критичного сценарію |
+| Error Rate | на ступені насичення |
+| Critical Scenario | визначити з A/B/C |
+| Primary Bottleneck | підтвердити статистикою CPU/DB/Redis та ефективністю 1 vs 3 API |
+
+Для порівняння масштабування використовуйте `speedup = RPS(3 вузли)/RPS(1 вузол)` та `efficiency = speedup/3`. Медіана p50 описує типовий запит, а p99 — повільний хвіст. Замкнена модель VUs може приховувати **coordinated omission**: коли відповіді сповільнюються, генератор починає менше нових ітерацій. Warm-up зменшує вплив JIT, DNS і прогріву пулу; GC та конкуренція за БД усе одно можуть підвищувати p99. Не робіть висновок про bottleneck лише за одним вимірюванням.

@@ -1,0 +1,151 @@
+{
+    "metrics": {
+        "iterations": {
+            "count": 15,
+            "rate": 4.8507258971765905
+        },
+        "http_req_failed": {
+            "passes": 0,
+            "fails": 90,
+            "value": 0
+        },
+        "http_req_duration": {
+            "avg": 67.05265378888889,
+            "p(50)": 22.057068,
+            "p(95)": 220.44760024999982,
+            "p(99)": 933.0312951599999
+        },
+        "data_received": {
+            "count": 50649,
+            "rate": 16378.961064406476
+        },
+        "http_req_duration{expected_response:true}": {
+            "avg": 67.05265378888889,
+            "p(50)": 22.057068,
+            "p(95)": 220.44760024999982,
+            "p(99)": 933.0312951599999
+        },
+        "iteration_duration": {
+            "p(95)": 1952.0546695,
+            "p(99)": 1968.3860419,
+            "avg": 406.8787855999999,
+            "p(50)": 147.091598
+        },
+        "http_req_connecting": {
+            "p(50)": 0,
+            "p(95)": 0,
+            "p(99)": 6.925156659999999,
+            "avg": 0.15975368888888888
+        },
+        "http_req_tls_handshaking": {
+            "avg": 0,
+            "p(50)": 0,
+            "p(95)": 0,
+            "p(99)": 0
+        },
+        "data_sent": {
+            "rate": 5141.769451007186,
+            "count": 15900
+        },
+        "http_reqs": {
+            "count": 90,
+            "rate": 29.104355383059545
+        },
+        "http_req_sending": {
+            "avg": 0.058625544444444434,
+            "p(50)": 0.032908999999999994,
+            "p(95)": 0.1948047499999998,
+            "p(99)": 0.4406895299999999
+        },
+        "vus": {
+            "value": 2,
+            "min": 2,
+            "max": 2
+        },
+        "http_req_blocked": {
+            "avg": 0.33696548888888883,
+            "p(50)": 0.010043,
+            "p(95)": 0.03189014999999997,
+            "p(99)": 14.16775268
+        },
+        "http_req_receiving": {
+            "avg": 0.2606184444444445,
+            "p(50)": 0.2299605,
+            "p(95)": 0.5146394999999999,
+            "p(99)": 0.59781881
+        },
+        "checks": {
+            "passes": 105,
+            "fails": 0,
+            "value": 1
+        },
+        "vus_max": {
+            "max": 2,
+            "value": 2,
+            "min": 2
+        },
+        "http_req_waiting": {
+            "p(50)": 21.736718500000002,
+            "p(95)": 219.54506209999983,
+            "p(99)": 932.5452153699999,
+            "avg": 66.73340979999998
+        }
+    },
+    "root_group": {
+        "name": "",
+        "path": "",
+        "id": "d41d8cd98f00b204e9800998ecf8427e",
+        "groups": {},
+        "checks": {
+                "catalog returned 200": {
+                    "name": "catalog returned 200",
+                    "path": "::catalog returned 200",
+                    "id": "85e4bc5fa427f1dc13c29a59ca074fb7",
+                    "passes": 15,
+                    "fails": 0
+                },
+                "attempt started": {
+                    "name": "attempt started",
+                    "path": "::attempt started",
+                    "id": "2b0c0466cf7ece43f160fea624be0308",
+                    "passes": 15,
+                    "fails": 0
+                },
+                "attempt read": {
+                    "name": "attempt read",
+                    "path": "::attempt read",
+                    "id": "b93b68b4fe23df0c56bbac0f5d9af8b9",
+                    "passes": 15,
+                    "fails": 0
+                },
+                "answer saved": {
+                    "id": "c8053e89ae5c38db3bcc1d2ce6908598",
+                    "passes": 15,
+                    "fails": 0,
+                    "name": "answer saved",
+                    "path": "::answer saved"
+                },
+                "attempt completed": {
+                    "passes": 15,
+                    "fails": 0,
+                    "name": "attempt completed",
+                    "path": "::attempt completed",
+                    "id": "912436b99af266bb984e4d7956453be7"
+                },
+                "score calculated": {
+                    "name": "score calculated",
+                    "path": "::score calculated",
+                    "id": "f414e4e881f0bd653e2c8fdaec550283",
+                    "passes": 15,
+                    "fails": 0
+                },
+                "saved result returned": {
+                    "path": "::saved result returned",
+                    "id": "85de4b92e308aed5f3f8ecf5d99bf2e8",
+                    "passes": 15,
+                    "fails": 0,
+                    "name": "saved result returned"
+                }
+            }
+    }
+}
