@@ -21,6 +21,7 @@ services:
       INSTANCE_ID: api-a
       Cache__RedisConnection: "redis:6379,abortConnect=false,connectTimeout=1000,syncTimeout=1000"
       ConnectionStrings__DefaultConnection: "Host=db;Port=5432;Database=online_testing;Username=app;Password=${DB_PASSWORD};Maximum Pool Size=20"
+      ConnectionStrings__ReplicaConnection: "Host=db_replica;Port=5432;Database=online_testing;Username=app;Password=${DB_PASSWORD};Maximum Pool Size=20;Timeout=2;Command Timeout=3"
     depends_on:
       migrate:
         condition: service_completed_successfully
@@ -37,6 +38,7 @@ services:
       Cache__RedisConnection: "redis:6379,abortConnect=false,connectTimeout=1000,syncTimeout=1000"
       LAB3_DELAY_MS: ${LAB3_DELAY_MS:-0}
       ConnectionStrings__DefaultConnection: "Host=db;Port=5432;Database=online_testing;Username=app;Password=${DB_PASSWORD};Maximum Pool Size=20"
+      ConnectionStrings__ReplicaConnection: "Host=db_replica;Port=5432;Database=online_testing;Username=app;Password=${DB_PASSWORD};Maximum Pool Size=20;Timeout=2;Command Timeout=3"
     depends_on:
       migrate:
         condition: service_completed_successfully
@@ -52,6 +54,7 @@ services:
       INSTANCE_ID: api-c
       Cache__RedisConnection: "redis:6379,abortConnect=false,connectTimeout=1000,syncTimeout=1000"
       ConnectionStrings__DefaultConnection: "Host=db;Port=5432;Database=online_testing;Username=app;Password=${DB_PASSWORD};Maximum Pool Size=20"
+      ConnectionStrings__ReplicaConnection: "Host=db_replica;Port=5432;Database=online_testing;Username=app;Password=${DB_PASSWORD};Maximum Pool Size=20;Timeout=2;Command Timeout=3"
     depends_on:
       migrate:
         condition: service_completed_successfully
@@ -61,17 +64,40 @@ services:
   db:
     image: postgres:17
     restart: unless-stopped
+    command: ["postgres", "-c", "wal_level=replica", "-c", "max_wal_senders=10", "-c", "max_replication_slots=10", "-c", "hot_standby=on"]
     environment:
       POSTGRES_DB: online_testing
       POSTGRES_USER: app
       POSTGRES_PASSWORD: ${DB_PASSWORD}
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./scripts/primary-setup.sh:/replication/primary-setup.sh:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U app -d online_testing"]
       interval: 5s
       timeout: 3s
       retries: 10
+    networks:
+      - testing-network
+
+  db_replica:
+    image: postgres:17
+    restart: unless-stopped
+    environment:
+      PGPASSWORD: ${DB_PASSWORD}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    entrypoint: ["/bin/bash", "/replication/replica-entrypoint.sh"]
+    volumes:
+      - postgres_replica_data:/var/lib/postgresql/data
+      - ./scripts/replica-entrypoint.sh:/replication/replica-entrypoint.sh:ro
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U app -d online_testing && test \"$(psql -U app -d online_testing -Atc 'SHOW in_hot_standby')\" = on"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
     networks:
       - testing-network
 
@@ -104,3 +130,4 @@ networks:
 
 volumes:
   postgres_data:
+  postgres_replica_data:
