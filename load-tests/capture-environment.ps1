@@ -16,7 +16,7 @@ $result = [pscustomobject]@{
     sutCpuRamLimits = 'No per-service CPU/RAM limits in docker-compose.yml; shared Docker allocation'
     apiInstances = @($services | Where-Object { $_.Service -match '^api_[abc]$' -and $_.State -eq 'running' }).Count
     postgresMaxConnections = [int]($connections | Select-Object -Last 1)
-    npgsqlConnectionPool = 'default; no Maximum Pool Size override in docker-compose.yml'
+    npgsqlConnectionPool = 'Maximum Pool Size=20 per API instance; three instances allow up to 60 pooled DB connections'
     redis = @($services | Where-Object { $_.Service -eq 'redis' } | Select-Object Service,State,Health)
     services = @($services | Select-Object Service,State,Health)
 }

@@ -1,7 +1,7 @@
 param(
     [string]$BaseUrl = 'http://host.docker.internal:8081',
     [string]$Image = 'grafana/k6:1.5.0',
-    [ValidateRange(2, 600)][int]$StageSeconds = 8,
+    [ValidateRange(2, 600)][int]$StageSeconds = 30,
     [switch]$Smoke
 )
 
@@ -13,13 +13,15 @@ $results = Join-Path $root $resultFolder
 New-Item -ItemType Directory -Force -Path $results | Out-Null
 $levels = if ($Smoke) { @(1) } else { @(10, 25, 50, 100, 200) }
 $duration = if ($Smoke) { '2s' } else { "${StageSeconds}s" }
-$redisStopped = $false
 $rows = @()
 
 function Get-DbReads {
-    $value = & docker compose exec -T db psql -U app -d online_testing -Atc "SELECT tup_returned FROM pg_stat_database WHERE datname='online_testing'"
-    if ($LASTEXITCODE -ne 0) { throw 'Cannot read PostgreSQL statistics.' }
-    return [long]($value | Select-Object -Last 1)
+    for ($attempt = 1; $attempt -le 5; $attempt++) {
+        $value = & docker compose exec -T db psql -U app -d online_testing -Atc "SELECT tup_returned FROM pg_stat_database WHERE datname='online_testing'" 2>$null
+        if ($LASTEXITCODE -eq 0) { return [long]($value | Select-Object -Last 1) }
+        Start-Sleep -Seconds 2
+    }
+    throw 'Cannot read PostgreSQL statistics after five attempts.'
 }
 
 function Invoke-K6([string]$mode, [int]$vus, [string]$runDuration, [string]$expected, [string]$outputName) {
@@ -54,13 +56,8 @@ function Invoke-K6([string]$mode, [int]$vus, [string]$runDuration, [string]$expe
     }
 }
 
-try {
-    foreach ($mode in @('warm', 'disabled')) {
-        if ($mode -eq 'disabled') {
-            & docker compose stop redis | Out-Null
-            if ($LASTEXITCODE -ne 0) { throw 'Cannot stop Redis.' }
-            $redisStopped = $true
-        } else {
+foreach ($mode in @('warm', 'disabled')) {
+        if ($mode -eq 'warm') {
             $url = $BaseUrl.Replace('host.docker.internal', 'localhost')
             Invoke-WebRequest "$url/api/tests" -SkipHttpErrorCheck | Out-Null
         }
@@ -79,10 +76,6 @@ try {
         $delta = (Get-DbReads) - $before
         Set-Content (Join-Path $results "$mode-db-reads.txt") $delta
     }
-}
-finally {
-    if ($redisStopped) { & docker compose start redis | Out-Null }
-}
 
 $rows | Format-Table -AutoSize
 $rows | ConvertTo-Json -Depth 4 | Set-Content (Join-Path $results 'read-summary.json') -Encoding utf8

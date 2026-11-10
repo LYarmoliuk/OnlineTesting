@@ -57,7 +57,7 @@ $lines += @(
     "PostgreSQL tup_returned: warm=$($warmReads.Trim()), disabled=$($disabledReads.Trim()).",
     "Повернуті БД рядки на HTTP-запит: warm=$(N $warmPerRequest), disabled=$(N $disabledPerRequest). Відносне зменшення: $(N $readReduction)%.",
     '',
-    'Це лічильник повернутих рядків на рівні БД, а не час CPU. Режим disabled зупиняє Redis: затримка включає очікування таймауту підключення, тому різницю latency не можна приписувати лише роботі з БД. Порівнюйте однакові VUs; пояснюйте p99 окремо від середнього та враховуйте, що генератор і SUT поділяють фізичний хост.'
+    'Це лічильник повернутих рядків на рівні БД, а не час CPU. Режим disabled звертається до PostgreSQL напряму через тестовий заголовок, Redis лишається доступним. Порівнюйте однакові VUs; пояснюйте p99 окремо від середнього та враховуйте, що генератор і SUT поділяють фізичний хост.'
 )
 $extended = @($rows | Where-Object { $_.targetSeconds -gt 0 -and $_.elapsedSeconds -gt $_.targetSeconds * 1.2 })
 if ($extended.Count -gt 0) {

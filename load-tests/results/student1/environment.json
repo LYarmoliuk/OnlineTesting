@@ -1,13 +1,13 @@
 {
-  "capturedAt": "2026-11-09T22:15:01.0741227+02:00",
-  "gitCommit": "3cf003bfa72d95d68accde3d7278a6a16acb24a6",
+  "capturedAt": "2026-11-10T22:37:14.2027530+02:00",
+  "gitCommit": "c1a238da519c6b1c9499953899f4c80c8a08fd85",
   "dockerCpus": 12,
-  "dockerMemoryBytes": 8173436928,
+  "dockerMemoryBytes": 8173432832,
   "generatorLimit": "1 CPU / 512 MiB; separate k6 container on the same Docker host",
   "sutCpuRamLimits": "No per-service CPU/RAM limits in docker-compose.yml; shared Docker allocation",
   "apiInstances": 3,
   "postgresMaxConnections": 100,
-  "npgsqlConnectionPool": "default; no Maximum Pool Size override in docker-compose.yml",
+  "npgsqlConnectionPool": "Maximum Pool Size=20 per API instance; three instances allow up to 60 pooled DB connections",
   "redis": [
     {
       "Service": "redis",

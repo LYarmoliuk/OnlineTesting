@@ -10,7 +10,7 @@ namespace OnlineTesting.Api.Controllers;
 
 [ApiController]
 [Route("api/tests")]
-public sealed class TestsController(AppDbContext dbContext, CacheAsideService cache)
+public sealed class TestsController(AppDbContext dbContext, CacheAsideService cache, IWebHostEnvironment environment)
     : ControllerBase
 {
     [HttpGet]
@@ -32,7 +32,8 @@ public sealed class TestsController(AppDbContext dbContext, CacheAsideService ca
                     CreatedAt = test.CreatedAt
                 })
                 .ToListAsync(token),
-            cancellationToken);
+            cancellationToken,
+            environment.IsDevelopment() && Request.Headers["X-Lab5-Cache-Bypass"] == "1");
 
         Response.Headers["X-Cache"] = result.Status;
         return Ok(result.Value);

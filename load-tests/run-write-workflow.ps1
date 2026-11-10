@@ -1,20 +1,19 @@
 param(
     [string]$BaseUrl = 'http://host.docker.internal:8081',
     [string]$Image = 'grafana/k6:1.5.0',
-    [ValidateRange(2, 600)][int]$StageSeconds = 8,
+    [ValidateRange(2, 600)][int]$StageSeconds = 30,
     [switch]$Smoke
 )
 
 $ErrorActionPreference = 'Stop'
 $ProgressPreference = 'SilentlyContinue'
 $root = Split-Path -Parent $MyInvocation.MyCommand.Path
-$results = Join-Path $root 'results\student2'
+$results = Join-Path $root $(if ($Smoke) { 'results\student2\smoke' } else { 'results\student2' })
 New-Item -ItemType Directory -Force -Path $results | Out-Null
 $levels = if ($Smoke) { @(1) } else { @(10, 25, 50, 100, 200) }
 $duration = if ($Smoke) { '2s' } else { "${StageSeconds}s" }
 $localUrl = $BaseUrl.Replace('host.docker.internal', 'localhost').TrimEnd('/')
 $testId = $null
-$oneNode = $false
 $rows = @()
 
 function Invoke-JsonPost([string]$url, [object]$body) {
@@ -28,6 +27,7 @@ function Invoke-K6([string]$scenario, [int]$nodes, [int]$vus, [string]$runDurati
         '--summary-export', "/results/$outputName.json",
         '-e', "BASE_URL=$BaseUrl", '-e', "TEST_ID=$testId",
         '-e', "QUESTION_ID=$questionId", '-e', "OPTION_ID=$optionId",
+        '-e', "SINGLE_NODE=$(if ($nodes -eq 1) { '1' } else { '0' })",
         "/src/$scenario.js"
     )
     & docker run --rm --cpus 1 --memory 512m -v "${root}:/src:ro" -v "${results}:/results" $Image @arguments | Out-Host
@@ -40,6 +40,8 @@ function Invoke-K6([string]$scenario, [int]$nodes, [int]$vus, [string]$runDurati
         scenario = $scenario
         nodes = $nodes
         vus = $vus
+        targetSeconds = if ($Smoke) { 2 } else { $StageSeconds }
+        elapsedSeconds = if ($m.http_reqs.rate -gt 0) { [math]::Round($m.http_reqs.count / $m.http_reqs.rate, 2) } else { 0 }
         rps = [math]::Round($m.http_reqs.rate, 2)
         avgMs = [math]::Round($m.http_req_duration.avg, 2)
         p50Ms = [math]::Round($m.http_req_duration.'p(50)', 2)
@@ -62,15 +64,16 @@ try {
     Invoke-RestMethod "$localUrl/api/tests/$testId" -Method Put -ContentType 'application/json' -Body (@{ title=$name; description='Temporary load fixture'; isPublished=$true } | ConvertTo-Json) | Out-Null
 
     foreach ($nodes in @(1, 3)) {
-        if ($nodes -eq 1) {
-            & docker compose stop api_b api_c | Out-Null
-            if ($LASTEXITCODE -ne 0) { throw 'Cannot switch to one API node.' }
-            $oneNode = $true
-        } else {
-            & docker compose start api_b api_c | Out-Null
-            if ($LASTEXITCODE -ne 0) { throw 'Cannot restore three API nodes.' }
-            $oneNode = $false
+        $ready = $false
+        for ($attempt = 1; $attempt -le 20; $attempt++) {
+            try {
+                $health = Invoke-WebRequest "$localUrl/health" -TimeoutSec 5
+                if ($health.StatusCode -eq 200) { $ready = $true; break }
+            } catch { }
+            Start-Sleep -Seconds 2
         }
+        if (-not $ready) { throw "API was not ready with $nodes nodes." }
+        Start-Sleep -Seconds 5
         foreach ($scenario in @('write', 'workflow')) {
             Invoke-K6 $scenario $nodes 2 '3s' 'warmup' | Out-Null
             foreach ($vus in $levels) {
@@ -80,7 +83,6 @@ try {
     }
 }
 finally {
-    if ($oneNode) { & docker compose start api_b api_c | Out-Null }
     if ($testId) {
         $sql = "DELETE FROM ""StudentAnswers"" WHERE ""TestAttemptId"" IN (SELECT ""Id"" FROM ""TestAttempts"" WHERE ""TestId""=$testId); DELETE FROM ""TestAttempts"" WHERE ""TestId""=$testId; DELETE FROM ""Tests"" WHERE ""Id""=$testId;"
         & docker compose exec -T db psql -v ON_ERROR_STOP=1 -U app -d online_testing -c $sql | Out-Null
@@ -90,5 +92,6 @@ finally {
 
 $rows | Format-Table -AutoSize
 $rows | ConvertTo-Json -Depth 4 | Set-Content (Join-Path $results 'write-workflow-summary.json') -Encoding utf8
-& (Join-Path $root 'render-write-workflow.ps1') -Summary (Join-Path $results 'write-workflow-summary.json') -Output (Join-Path (Split-Path $root -Parent) 'docs/lab5-write-workflow.md')
+$reportName = if ($Smoke) { 'lab5-write-workflow-smoke.md' } else { 'lab5-write-workflow.md' }
+& (Join-Path $root 'render-write-workflow.ps1') -Summary (Join-Path $results 'write-workflow-summary.json') -Output (Join-Path (Split-Path $root -Parent) "docs/$reportName")
 Write-Host "Results: $results"

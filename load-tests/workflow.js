@@ -5,17 +5,19 @@ const base = __ENV.BASE_URL || 'http://host.docker.internal:8081';
 const testId = Number(__ENV.TEST_ID);
 const questionId = Number(__ENV.QUESTION_ID);
 const optionId = Number(__ENV.OPTION_ID);
+const singleNode = __ENV.SINGLE_NODE === '1' ? { 'X-Lab5-Single-Node': '1' } : {};
+const request = { headers: singleNode };
 if (!testId || !questionId || !optionId) throw new Error('TEST_ID, QUESTION_ID and OPTION_ID are required');
 
 export default function () {
-  const catalog = http.get(`${base}/api/tests`);
+  const catalog = http.get(`${base}/api/tests`, request);
   if (!check(catalog, { 'catalog returned 200': (r) => r.status === 200 })) return;
 
-  const started = http.post(`${base}/api/tests/${testId}/attempts`);
+  const started = http.post(`${base}/api/tests/${testId}/attempts`, null, request);
   if (!check(started, { 'attempt started': (r) => r.status === 201 })) return;
   const attemptId = started.json('attemptId');
   const token = started.json('accessToken');
-  const headers = { headers: { 'X-Attempt-Token': token, 'Content-Type': 'application/json' } };
+  const headers = { headers: { 'X-Attempt-Token': token, 'Content-Type': 'application/json', ...singleNode } };
 
   const read = http.get(`${base}/api/attempts/${attemptId}`, headers);
   if (!check(read, { 'attempt read': (r) => r.status === 200 })) return;

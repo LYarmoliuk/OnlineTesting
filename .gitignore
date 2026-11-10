@@ -24,3 +24,8 @@ frontend/coverage/
 # OS
 .DS_Store
 Thumbs.db
+
+# Generated load-test diagnostics
+load-tests/*.log
+load-tests/results/student2/smoke/
+docs/lab5-write-workflow-smoke.md

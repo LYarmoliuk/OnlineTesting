@@ -383,7 +383,7 @@ Redis має межу пам'яті 128 МБ і політику `allkeys-lru`: 
 
 ## 14. Лабораторна робота 5 — Performance Baseline
 
-Сценарії k6 розташовані в `load-tests/`: A — інтенсивне читання каталогу, B — створення й видалення запитань, C — повний цикл проходження тесту з обчисленням результату. Кожен сценарій має warm-up, ступені 10, 25, 50, 100 і 200 VUs, окремі JSON-звіти та метрики RPS, avg, p50, p95, p99 і error rate. Сценарій A порівнює Redis warm та disabled і повернуті PostgreSQL рядки. Сценарії B/C порівнюють один та три API-вузли.
+Сценарії k6 розташовані в `load-tests/`: A — інтенсивне читання каталогу, B — створення й видалення запитань, C — повний цикл проходження тесту з обчисленням результату. Кожен сценарій має warm-up, ступені 10, 25, 50, 100 і 200 VUs, окремі JSON-звіти та метрики RPS, avg, p50, p95, p99 і error rate. Сценарій A порівнює Redis warm із прямим читанням PostgreSQL через тестовий заголовок `X-Lab5-Cache-Bypass: 1` (тільки в Development). Сценарії B/C порівнюють один та три API-вузли через той самий Nginx; заголовок `X-Lab5-Single-Node: 1` спрямовує навантаження тільки на `api_a`.
 
 ```powershell
 pwsh -NoProfile -File load-tests/capture-environment.ps1
@@ -393,20 +393,22 @@ pwsh -NoProfile -File load-tests/run-read.ps1 -StageSeconds 30
 pwsh -NoProfile -File load-tests/run-write-workflow.ps1 -StageSeconds 30
 ```
 
-Запускайте скрипти **послідовно**. Генератор k6 працює в окремому Docker-контейнері з лімітом 1 CPU / 512 MiB; фізичний хост із SUT спільний. Конфігурація Docker, кількість API, `max_connections` PostgreSQL і стан Redis записуються в `load-tests/results/student1/environment.json`. Пул Npgsql використовує значення за замовчуванням, оскільки `Maximum Pool Size` не задано. Скрипти відновлюють Redis і всі три API-вузли після експериментів.
+Запускайте скрипти **послідовно**. Генератор k6 працює в окремому Docker-контейнері з лімітом 1 CPU / 512 MiB; фізичний хост із SUT спільний. Конфігурація Docker, кількість API, `max_connections` PostgreSQL і стан Redis записуються в `load-tests/results/student1/environment.json`. Пул Npgsql обмежено до 20 з'єднань на API (до 60 сумарно при трьох вузлах) при ліміті PostgreSQL 100. Обидва режими зберігають три запущені API та доступний Redis. Smoke-результати зберігаються окремо від повних вимірювань.
 
-Після запуску таблиці та графіки автоматично з'являються в [docs/lab5-read.md](docs/lab5-read.md) і [docs/lab5-write-workflow.md](docs/lab5-write-workflow.md). Сирі дані — в `load-tests/results/student1/` та `load-tests/results/student2/`. Для захисту заповніть картку нижче фактичними вимірюваннями на своєму комп'ютері; не переносіть числа з іншого обладнання.
+Після запуску таблиці та графіки автоматично з'являються в [docs/lab5-read.md](docs/lab5-read.md) і [docs/lab5-write-workflow.md](docs/lab5-write-workflow.md). Сирі дані — в `load-tests/results/student1/` та `load-tests/results/student2/`. Наведена картка виміряна на цьому комп'ютері 10 листопада 2026 року за 30 секунд на ступінь.
 
 ### System Performance Baseline
 
-| Поле | Значення після вимірювання |
+| Поле | Виміряне значення |
 |---|---|
-| Environment Config | див. `load-tests/results/student1/environment.json` |
-| Stable Throughput | за найбільшим RPS зі стабільними p95 та error rate |
-| Saturation Point | перший ступінь, де RPS вирівнюється, а p95/p99 або errors зростають |
-| p95 / p99 Latency | зі стабільного ступеня критичного сценарію |
-| Error Rate | на ступені насичення |
-| Critical Scenario | визначити з A/B/C |
-| Primary Bottleneck | підтвердити статистикою CPU/DB/Redis та ефективністю 1 vs 3 API |
+| Environment Config | Docker: 12 CPU, 8,17 GB RAM; 3 API, PostgreSQL `max_connections=100`, Npgsql до 20 з'єднань на вузол, Redis healthy; k6: 1 CPU / 512 MiB на тому самому хості |
+| Stable Throughput | 1362,56 HTTP RPS, workflow на 3 API при 100 VUs |
+| Saturation Point | між 100 і 200 VUs для workflow: RPS 1362,56 → 1410,56 (+3,5%), p99 213,29 → 486,84 мс (+128%) |
+| p95 / p99 Latency | 164,22 / 213,29 мс при 100 VUs workflow |
+| Error Rate | 0% при 200 VUs workflow |
+| Critical Scenario | C — повне проходження тесту (шість послідовних HTTP-запитів на цикл) |
+| Primary Bottleneck | Спільний шлях обчислення й запису через API та PostgreSQL: три API дають лише 1410,56 / 1415,56 = 0,996 прискорення workflow при 200 VUs. Це висновок за масштабуванням, а не доказ, що обмежує саме PostgreSQL; для точного розмежування потрібні одночасні CPU/DB/k6 samples. |
+
+Порівняння кешу: при 200 VUs warm дає 1720,96 RPS і p99 504,97 мс, пряме читання БД — 2201,98 RPS і p99 381,31 мс. Для цього малого каталогу кеш **не прискорив** відповіді, проте зменшив кількість повернутих PostgreSQL рядків на HTTP-запит приблизно на 98,36%. Усі десять ступенів сценарію A тривали близько 30 секунд. Показники цього спільного Docker-хоста слід повторити на окремому генераторі перед перенесенням висновків на інше середовище.
 
 Для порівняння масштабування використовуйте `speedup = RPS(3 вузли)/RPS(1 вузол)` та `efficiency = speedup/3`. Медіана p50 описує типовий запит, а p99 — повільний хвіст. Замкнена модель VUs може приховувати **coordinated omission**: коли відповіді сповільнюються, генератор починає менше нових ітерацій. Warm-up зменшує вплив JIT, DNS і прогріву пулу; GC та конкуренція за БД усе одно можуть підвищувати p99. Не робіть висновок про bottleneck лише за одним вимірюванням.

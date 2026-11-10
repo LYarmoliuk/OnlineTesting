@@ -15,8 +15,12 @@ public sealed class CacheAsideService(
         string key,
         TimeSpan ttl,
         Func<CancellationToken, Task<T>> loadFromDatabase,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken,
+        bool bypassCache = false)
     {
+        if (bypassCache)
+            return new CacheReadResult<T>(await loadFromDatabase(cancellationToken), "BYPASS");
+
         var cacheAvailable = true;
         try
         {

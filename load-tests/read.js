@@ -8,7 +8,10 @@ const cacheHits = new Counter('cache_hits');
 const cacheMisses = new Counter('cache_misses');
 
 export default function () {
-  const response = http.get(`${base}/api/tests`, { tags: { business: 'read_catalog' } });
+  const response = http.get(`${base}/api/tests`, {
+    headers: expectedCache === 'BYPASS' ? { 'X-Lab5-Cache-Bypass': '1' } : {},
+    tags: { business: 'read_catalog' },
+  });
   const cacheStatus = response.headers['X-Cache'];
   if (cacheStatus === 'HIT') cacheHits.add(1);
   if (cacheStatus === 'MISS') cacheMisses.add(1);

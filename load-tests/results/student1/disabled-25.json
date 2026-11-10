@@ -1,87 +1,77 @@
 {
-    "root_group": {
-        "id": "d41d8cd98f00b204e9800998ecf8427e",
-        "groups": {},
-        "checks": {
-                "catalog returned 200": {
-                    "path": "::catalog returned 200",
-                    "id": "85e4bc5fa427f1dc13c29a59ca074fb7",
-                    "passes": 479,
-                    "fails": 0,
-                    "name": "catalog returned 200"
-                },
-                "cache mode matches": {
-                    "fails": 0,
-                    "name": "cache mode matches",
-                    "path": "::cache mode matches",
-                    "id": "05a88b7ec20cb8614079ee60820d4ab6",
-                    "passes": 479
-                }
-            },
-        "name": "",
-        "path": ""
-    },
     "metrics": {
-        "http_req_duration{expected_response:true}": {
-            "avg": 1613.7506664801672,
-            "p(50)": 1805.287267,
-            "p(95)": 2000.861618,
-            "p(99)": 2003.0955329399999
+        "checks": {
+            "passes": 129040,
+            "fails": 0,
+            "value": 1
         },
-        "http_req_sending": {
-            "p(99)": 0.19083189999999914,
-            "avg": 0.020345156576200417,
-            "p(50)": 0.009698,
-            "p(95)": 0.04717609999999983
+        "http_req_failed": {
+            "passes": 0,
+            "fails": 64520,
+            "value": 0
+        },
+        "http_req_connecting": {
+            "avg": 0.010185345629262241,
+            "p(50)": 0,
+            "p(95)": 0,
+            "p(99)": 0
+        },
+        "data_received": {
+            "count": 38195590,
+            "rate": 1272698.2252676194
+        },
+        "http_req_receiving": {
+            "p(99)": 2.485831969999995,
+            "avg": 0.18294947358958516,
+            "p(50)": 0.057418,
+            "p(95)": 0.4788030999999998
+        },
+        "iteration_duration": {
+            "avg": 11.590596682439473,
+            "p(50)": 10.217204500000001,
+            "p(95)": 22.91278189999999,
+            "p(99)": 32.10675686
         },
         "http_req_waiting": {
-            "avg": 1613.668275471816,
-            "p(50)": 1805.207002,
-            "p(95)": 2000.8125294,
-            "p(99)": 2003.03305174
+            "p(99)": 30.484401829999992,
+            "avg": 10.996638517033544,
+            "p(50)": 9.696633,
+            "p(95)": 21.726700049999973
         },
-        "http_req_blocked": {
-            "avg": 0.40586678705636703,
-            "p(50)": 0.003264,
-            "p(95)": 3.3110869,
-            "p(99)": 11.22018268
+        "data_sent": {
+            "count": 7355280,
+            "rate": 245082.00560186175
+        },
+        "iterations": {
+            "count": 64520,
+            "rate": 2149.842154402296
         },
         "http_req_duration": {
-            "avg": 1613.7506664801672,
-            "p(50)": 1805.287267,
-            "p(95)": 2000.861618,
-            "p(99)": 2003.0955329399999
+            "avg": 11.228679021171947,
+            "p(50)": 9.898056,
+            "p(95)": 22.21697274999998,
+            "p(99)": 31.19996675999998
         },
         "vus_max": {
             "value": 25,
             "min": 25,
             "max": 25
         },
-        "iteration_duration": {
-            "avg": 1614.3651427933207,
-            "p(50)": 1812.606935,
-            "p(95)": 2001.0482475,
-            "p(99)": 2003.20069432
-        },
-        "data_received": {
-            "count": 283568,
-            "rate": 8914.084358850328
+        "http_req_blocked": {
+            "p(95)": 0.010961,
+            "p(99)": 0.09189125999999989,
+            "avg": 0.02413368197458145,
+            "p(50)": 0.004688
         },
         "http_reqs": {
-            "count": 479,
-            "rate": 15.05757493049042
+            "rate": 2149.842154402296,
+            "count": 64520
         },
-        "http_req_receiving": {
-            "avg": 0.062045851774530314,
-            "p(50)": 0.048727,
-            "p(95)": 0.11996129999999997,
-            "p(99)": 0.25881252
-        },
-        "http_req_connecting": {
-            "p(95)": 2.0499005999999995,
-            "p(99)": 9.738540939999996,
-            "avg": 0.32985115240083507,
-            "p(50)": 0
+        "http_req_duration{expected_response:true}": {
+            "p(95)": 22.21697274999998,
+            "p(99)": 31.19996675999998,
+            "avg": 11.228679021171947,
+            "p(50)": 9.898056
         },
         "http_req_tls_handshaking": {
             "avg": 0,
@@ -89,28 +79,38 @@
             "p(95)": 0,
             "p(99)": 0
         },
-        "data_sent": {
-            "count": 43110,
-            "rate": 1355.1817437441377
+        "http_req_sending": {
+            "avg": 0.04909103054866696,
+            "p(50)": 0.013867,
+            "p(95)": 0.06957879999999984,
+            "p(99)": 0.5935661599999944
         },
         "vus": {
-            "value": 9,
-            "min": 9,
+            "value": 25,
+            "min": 25,
             "max": 25
-        },
-        "iterations": {
-            "count": 479,
-            "rate": 15.05757493049042
-        },
-        "http_req_failed": {
-            "fails": 479,
-            "passes": 0,
-            "value": 0
-        },
-        "checks": {
-            "passes": 958,
-            "fails": 0,
-            "value": 1
         }
+    },
+    "root_group": {
+        "name": "",
+        "path": "",
+        "id": "d41d8cd98f00b204e9800998ecf8427e",
+        "groups": {},
+        "checks": {
+                "catalog returned 200": {
+                    "fails": 0,
+                    "name": "catalog returned 200",
+                    "path": "::catalog returned 200",
+                    "id": "85e4bc5fa427f1dc13c29a59ca074fb7",
+                    "passes": 64520
+                },
+                "cache mode matches": {
+                    "id": "05a88b7ec20cb8614079ee60820d4ab6",
+                    "passes": 64520,
+                    "fails": 0,
+                    "name": "cache mode matches",
+                    "path": "::cache mode matches"
+                }
+            }
     }
 }
