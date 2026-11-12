@@ -84,7 +84,7 @@ public sealed class QuestionsController(AppDbContext dbContext, CacheAsideServic
         CancellationToken cancellationToken)
     {
         var node = "cache";
-        var primaryOnly = environment.IsDevelopment() && Request.Headers["X-Lab6-Primary-Only"] == "1";
+        var primaryOnly = Request.Headers["X-Lab6-Primary-Only"] == "1";
         var result = await cache.ReadAsync(
             CacheKeys.QuestionsForTest(testId),
             TimeSpan.FromSeconds(60),

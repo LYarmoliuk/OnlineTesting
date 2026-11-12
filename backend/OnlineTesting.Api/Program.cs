@@ -48,7 +48,9 @@ app.Use(async (context, next) =>
 {
     context.Response.Headers["X-Instance-ID"] = instanceId;
     try { await next(context); }
-    catch (Exception ex) when (ex is NpgsqlException or DbUpdateException or TimeoutException)
+    catch (Exception ex) when (
+        ex is NpgsqlException or DbUpdateException or TimeoutException ||
+        ex is InvalidOperationException { InnerException: NpgsqlException or DbUpdateException or TimeoutException })
     {
         if (context.Response.HasStarted) throw;
         context.Response.Clear();
