@@ -9,7 +9,10 @@ const cacheMisses = new Counter('cache_misses');
 
 export default function () {
   const response = http.get(`${base}/api/tests`, {
-    headers: expectedCache === 'BYPASS' ? { 'X-Lab5-Cache-Bypass': '1' } : {},
+    headers: {
+      ...(expectedCache === 'BYPASS' ? { 'X-Lab5-Cache-Bypass': '1' } : {}),
+      ...(__ENV.LAB6_PRIMARY_ONLY === '1' ? { 'X-Lab6-Primary-Only': '1' } : {}),
+    },
     tags: { business: 'read_catalog' },
   });
   const cacheStatus = response.headers['X-Cache'];

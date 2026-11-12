@@ -1,0 +1,92 @@
+[
+  {
+    "mode": "primary",
+    "vus": 10,
+    "rps": 1647.27,
+    "p95Ms": 9.84,
+    "p99Ms": 13.69,
+    "errorPct": 0.0,
+    "failedChecks": 0
+  },
+  {
+    "mode": "primary",
+    "vus": 25,
+    "rps": 2055.34,
+    "p95Ms": 24.09,
+    "p99Ms": 33.5,
+    "errorPct": 0.0,
+    "failedChecks": 0
+  },
+  {
+    "mode": "primary",
+    "vus": 50,
+    "rps": 2292.04,
+    "p95Ms": 44.09,
+    "p99Ms": 58.77,
+    "errorPct": 0.0,
+    "failedChecks": 0
+  },
+  {
+    "mode": "primary",
+    "vus": 100,
+    "rps": 2239.63,
+    "p95Ms": 98.39,
+    "p99Ms": 127.41,
+    "errorPct": 0.0,
+    "failedChecks": 0
+  },
+  {
+    "mode": "primary",
+    "vus": 200,
+    "rps": 2287.56,
+    "p95Ms": 193.29,
+    "p99Ms": 309.69,
+    "errorPct": 0.0,
+    "failedChecks": 0
+  },
+  {
+    "mode": "replica",
+    "vus": 10,
+    "rps": 1836.49,
+    "p95Ms": 8.19,
+    "p99Ms": 13.26,
+    "errorPct": 0.0,
+    "failedChecks": 0
+  },
+  {
+    "mode": "replica",
+    "vus": 25,
+    "rps": 2071.72,
+    "p95Ms": 27.45,
+    "p99Ms": 38.41,
+    "errorPct": 0.0,
+    "failedChecks": 0
+  },
+  {
+    "mode": "replica",
+    "vus": 50,
+    "rps": 2188.28,
+    "p95Ms": 49.36,
+    "p99Ms": 66.3,
+    "errorPct": 0.0,
+    "failedChecks": 0
+  },
+  {
+    "mode": "replica",
+    "vus": 100,
+    "rps": 2183.16,
+    "p95Ms": 98.87,
+    "p99Ms": 117.49,
+    "errorPct": 0.0,
+    "failedChecks": 0
+  },
+  {
+    "mode": "replica",
+    "vus": 200,
+    "rps": 2066.95,
+    "p95Ms": 201.53,
+    "p99Ms": 401.25,
+    "errorPct": 0.0,
+    "failedChecks": 0
+  }
+]
