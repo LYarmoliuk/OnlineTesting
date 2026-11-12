@@ -10,17 +10,21 @@ namespace OnlineTesting.Api.Controllers;
 
 [ApiController]
 [Route("api/tests")]
-public sealed class TestsController(AppDbContext dbContext, CacheAsideService cache, IWebHostEnvironment environment)
+public sealed class TestsController(AppDbContext dbContext, CacheAsideService cache, ReplicaReadService reads, IWebHostEnvironment environment)
     : ControllerBase
 {
     [HttpGet]
     public async Task<ActionResult<IEnumerable<TestResponseDto>>> GetTests(
         CancellationToken cancellationToken)
     {
+        var node = "cache";
+        var primaryOnly = environment.IsDevelopment() && Request.Headers["X-Lab6-Primary-Only"] == "1";
         var result = await cache.ReadAsync(
             CacheKeys.TestsList,
             TimeSpan.FromSeconds(30),
-            token => dbContext.Tests
+            async token =>
+            {
+                var read = await reads.ReadAsync((db, ct) => db.Tests
                 .AsNoTracking()
                 .OrderByDescending(test => test.CreatedAt)
                 .Select(test => new TestResponseDto
@@ -31,11 +35,15 @@ public sealed class TestsController(AppDbContext dbContext, CacheAsideService ca
                     IsPublished = test.IsPublished,
                     CreatedAt = test.CreatedAt
                 })
-                .ToListAsync(token),
+                .ToListAsync(ct), primaryOnly, token);
+                node = read.Node;
+                return read.Value;
+            },
             cancellationToken,
-            environment.IsDevelopment() && Request.Headers["X-Lab5-Cache-Bypass"] == "1");
+            (environment.IsDevelopment() && Request.Headers["X-Lab5-Cache-Bypass"] == "1") || primaryOnly);
 
         Response.Headers["X-Cache"] = result.Status;
+        Response.Headers["X-DB-Node"] = node;
         return Ok(result.Value);
     }
 
@@ -44,6 +52,7 @@ public sealed class TestsController(AppDbContext dbContext, CacheAsideService ca
         int id,
         CancellationToken cancellationToken)
     {
+        Response.Headers["X-DB-Node"] = "primary";
         var test = await dbContext.Tests
             .AsNoTracking()
             .Where(test => test.Id == id)

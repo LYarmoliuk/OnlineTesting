@@ -1,5 +1,6 @@
 
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
 using OnlineTesting.Api.Caching;
 using OnlineTesting.Api.Data;
 
@@ -28,6 +29,7 @@ builder.Services.AddStackExchangeRedisCache(options =>
 });
 builder.Services.AddScoped<CacheAsideService>();
 builder.Services.AddScoped<CacheInvalidationInterceptor>();
+builder.Services.AddScoped<ReplicaReadService>();
 builder.Services.AddDbContext<AppDbContext>((services, options) =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))
         .AddInterceptors(services.GetRequiredService<CacheInvalidationInterceptor>()));
@@ -45,7 +47,14 @@ var instanceId = Environment.GetEnvironmentVariable("INSTANCE_ID") ?? Environmen
 app.Use(async (context, next) =>
 {
     context.Response.Headers["X-Instance-ID"] = instanceId;
-    await next(context);
+    try { await next(context); }
+    catch (Exception ex) when (ex is NpgsqlException or DbUpdateException or TimeoutException)
+    {
+        if (context.Response.HasStarted) throw;
+        context.Response.Clear();
+        context.Response.StatusCode = StatusCodes.Status503ServiceUnavailable;
+        await context.Response.WriteAsJsonAsync(new { error = "Primary database unavailable", mode = "read-only" });
+    }
 });
 
 if (app.Environment.IsDevelopment())
