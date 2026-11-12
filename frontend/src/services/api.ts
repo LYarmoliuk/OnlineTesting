@@ -41,7 +41,9 @@ function json(method: string, body?: unknown): RequestInit {
 }
 
 export const api = {
-  getTests: () => request<Test[]>('/api/tests'),
+  getTests: (primaryOnly = false) => request<Test[]>('/api/tests', primaryOnly
+    ? { headers: { 'X-Lab6-Primary-Only': '1' } }
+    : {}),
   createTest: (data: TestInput) =>
     request<Test>('/api/tests', json('POST', data)),
   updateTest: (id: number, data: TestInput & { isPublished: boolean }) =>
@@ -49,8 +51,10 @@ export const api = {
   deleteTest: (id: number) =>
     request<void>(`/api/tests/${id}`, json('DELETE')),
 
-  getQuestions: (testId: number) =>
-    request<Question[]>(`/api/tests/${testId}/questions`),
+  getQuestions: (testId: number, primaryOnly = false) =>
+    request<Question[]>(`/api/tests/${testId}/questions`, primaryOnly
+      ? { headers: { 'X-Lab6-Primary-Only': '1' } }
+      : {}),
   createQuestion: (testId: number, data: QuestionInput) =>
     request<Question>(`/api/tests/${testId}/questions`, json('POST', data)),
   updateQuestion: (id: number, data: QuestionInput) =>

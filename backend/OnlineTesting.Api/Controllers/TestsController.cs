@@ -18,7 +18,7 @@ public sealed class TestsController(AppDbContext dbContext, CacheAsideService ca
         CancellationToken cancellationToken)
     {
         var node = "cache";
-        var primaryOnly = environment.IsDevelopment() && Request.Headers["X-Lab6-Primary-Only"] == "1";
+        var primaryOnly = Request.Headers["X-Lab6-Primary-Only"] == "1";
         var result = await cache.ReadAsync(
             CacheKeys.TestsList,
             TimeSpan.FromSeconds(30),

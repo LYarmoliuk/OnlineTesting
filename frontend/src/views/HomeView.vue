@@ -52,11 +52,11 @@ function resetOptionForm() {
   optionForm.value = { text: '', isCorrect: false }
 }
 
-async function loadTests() {
+async function loadTests(primaryOnly = false) {
   loading.value = true
   error.value = ''
   try {
-    tests.value = await api.getTests()
+    tests.value = await api.getTests(primaryOnly)
   } catch (e) {
     showError(e)
   } finally {
@@ -86,7 +86,7 @@ async function saveTest() {
     }
 
     resetTestForm()
-    await loadTests()
+    await loadTests(true)
   } catch (e) {
     showError(e)
   }
@@ -114,7 +114,7 @@ async function deleteTest(test: Test) {
       options.value = []
     }
     notice.value = 'Тест видалено.'
-    await loadTests()
+    await loadTests(true)
   } catch (e) {
     showError(e)
   }
@@ -154,7 +154,7 @@ async function saveQuestion() {
     }
 
     resetQuestionForm()
-    questions.value = await api.getQuestions(selectedTest.value.id)
+    questions.value = await api.getQuestions(selectedTest.value.id, true)
   } catch (e) {
     showError(e)
   }
@@ -197,7 +197,7 @@ async function deleteQuestion(question: Question) {
       options.value = []
       resetOptionForm()
     }
-    questions.value = await api.getQuestions(question.testId)
+    questions.value = await api.getQuestions(question.testId, true)
     resetQuestionForm()
     notice.value = 'Запитання видалено.'
   } catch (e) {
@@ -245,7 +245,7 @@ async function deleteOption(option: AnswerOption) {
   }
 }
 
-onMounted(loadTests)
+onMounted(() => loadTests())
 </script>
 
 <template>
@@ -295,7 +295,7 @@ onMounted(loadTests)
             <p class="eyebrow">БІБЛІОТЕКА</p>
             <h2>Мої тести</h2>
           </div>
-          <button class="icon-button" title="Оновити список" @click="loadTests">↻</button>
+          <button class="icon-button" title="Оновити список" @click="loadTests()">↻</button>
         </div>
 
         <p v-if="loading" class="empty-state">Завантаження тестів…</p>
