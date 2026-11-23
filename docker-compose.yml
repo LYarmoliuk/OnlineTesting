@@ -22,8 +22,12 @@ services:
       Cache__RedisConnection: "redis:6379,abortConnect=false,connectTimeout=1000,syncTimeout=1000"
       ConnectionStrings__DefaultConnection: "Host=db;Port=5432;Database=online_testing;Username=app;Password=${DB_PASSWORD};Maximum Pool Size=20"
       ConnectionStrings__ReplicaConnection: "Host=db_replica;Port=5432;Database=online_testing;Username=app;Password=${DB_PASSWORD};Maximum Pool Size=20;Timeout=2;Command Timeout=3"
+      ConnectionStrings__ShardAConnection: "Host=db;Port=5432;Database=online_testing;Username=app;Password=${DB_PASSWORD};Maximum Pool Size=20"
+      ConnectionStrings__ShardBConnection: "Host=db_shard_b;Port=5432;Database=online_testing;Username=app;Password=${DB_PASSWORD};Maximum Pool Size=20"
     depends_on:
       migrate:
+        condition: service_completed_successfully
+      lab7_init:
         condition: service_completed_successfully
     networks:
       - testing-network
@@ -39,8 +43,12 @@ services:
       LAB3_DELAY_MS: ${LAB3_DELAY_MS:-0}
       ConnectionStrings__DefaultConnection: "Host=db;Port=5432;Database=online_testing;Username=app;Password=${DB_PASSWORD};Maximum Pool Size=20"
       ConnectionStrings__ReplicaConnection: "Host=db_replica;Port=5432;Database=online_testing;Username=app;Password=${DB_PASSWORD};Maximum Pool Size=20;Timeout=2;Command Timeout=3"
+      ConnectionStrings__ShardAConnection: "Host=db;Port=5432;Database=online_testing;Username=app;Password=${DB_PASSWORD};Maximum Pool Size=20"
+      ConnectionStrings__ShardBConnection: "Host=db_shard_b;Port=5432;Database=online_testing;Username=app;Password=${DB_PASSWORD};Maximum Pool Size=20"
     depends_on:
       migrate:
+        condition: service_completed_successfully
+      lab7_init:
         condition: service_completed_successfully
     networks:
       - testing-network
@@ -55,8 +63,12 @@ services:
       Cache__RedisConnection: "redis:6379,abortConnect=false,connectTimeout=1000,syncTimeout=1000"
       ConnectionStrings__DefaultConnection: "Host=db;Port=5432;Database=online_testing;Username=app;Password=${DB_PASSWORD};Maximum Pool Size=20"
       ConnectionStrings__ReplicaConnection: "Host=db_replica;Port=5432;Database=online_testing;Username=app;Password=${DB_PASSWORD};Maximum Pool Size=20;Timeout=2;Command Timeout=3"
+      ConnectionStrings__ShardAConnection: "Host=db;Port=5432;Database=online_testing;Username=app;Password=${DB_PASSWORD};Maximum Pool Size=20"
+      ConnectionStrings__ShardBConnection: "Host=db_shard_b;Port=5432;Database=online_testing;Username=app;Password=${DB_PASSWORD};Maximum Pool Size=20"
     depends_on:
       migrate:
+        condition: service_completed_successfully
+      lab7_init:
         condition: service_completed_successfully
     networks:
       - testing-network
@@ -101,6 +113,38 @@ services:
     networks:
       - testing-network
 
+  db_shard_b:
+    image: postgres:17
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: online_testing
+      POSTGRES_USER: app
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - postgres_shard_b_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U app -d online_testing"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    networks:
+      - testing-network
+
+  lab7_init:
+    image: postgres:17
+    entrypoint: ["/bin/bash", "/lab7/lab7-init.sh"]
+    environment:
+      DB_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - ./scripts/lab7-init.sh:/lab7/lab7-init.sh:ro
+    depends_on:
+      db:
+        condition: service_healthy
+      db_shard_b:
+        condition: service_healthy
+    networks:
+      - testing-network
+
   redis:
     image: redis:7-alpine
     restart: unless-stopped
@@ -131,3 +175,4 @@ networks:
 volumes:
   postgres_data:
   postgres_replica_data:
+  postgres_shard_b_data:
