@@ -1,0 +1,25 @@
+{
+  "strategy": "legacy",
+  "count": 300,
+  "hotPercent": 90,
+  "attemptBase": 7000000,
+  "eventType": "lab7-seed-206aac83083f46648306b43bc5fccc05",
+  "rows": [
+    {
+      "shard": "shard-a",
+      "records": 279,
+      "dataPct": 93.0,
+      "writeOperations": 279,
+      "writePct": 93.0
+    },
+    {
+      "shard": "shard-b",
+      "records": 21,
+      "dataPct": 7.0,
+      "writeOperations": 21,
+      "writePct": 7.0
+    }
+  ],
+  "writeP95Ms": 12.66,
+  "writeP99Ms": 15.65
+}

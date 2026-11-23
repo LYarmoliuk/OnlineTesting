@@ -1,0 +1,100 @@
+{
+    "metrics": {
+        "http_req_blocked": {
+            "avg": 0.011620051519154531,
+            "p(95)": 0.010218349999999998,
+            "p(99)": 0.043262550000000115
+        },
+        "vus_max": {
+            "value": 5,
+            "min": 5,
+            "max": 5
+        },
+        "http_req_connecting": {
+            "avg": 0.003613365163238347,
+            "p(95)": 0,
+            "p(99)": 0
+        },
+        "iterations": {
+            "count": 10598,
+            "rate": 706.2240834569802
+        },
+        "http_req_receiving": {
+            "avg": 0.12562499056425716,
+            "p(95)": 0.23782194999999998,
+            "p(99)": 0.4522221100000043
+        },
+        "vus": {
+            "value": 5,
+            "min": 5,
+            "max": 5
+        },
+        "http_req_failed": {
+            "passes": 0,
+            "fails": 10598,
+            "value": 0
+        },
+        "http_reqs": {
+            "count": 10598,
+            "rate": 706.2240834569802
+        },
+        "http_req_sending": {
+            "p(95)": 0.078491,
+            "p(99)": 0.16303539000000203,
+            "avg": 0.037191928665786016
+        },
+        "http_req_waiting": {
+            "avg": 6.661744777599536,
+            "p(95)": 10.697211749999994,
+            "p(99)": 15.701543680000023
+        },
+        "http_req_duration": {
+            "avg": 6.824561696829584,
+            "p(95)": 10.9287847,
+            "p(99)": 16.01137393000007
+        },
+        "http_req_duration{expected_response:true}": {
+            "avg": 6.824561696829584,
+            "p(95)": 10.9287847,
+            "p(99)": 16.01137393000007
+        },
+        "http_req_tls_handshaking": {
+            "p(95)": 0,
+            "p(99)": 0,
+            "avg": 0
+        },
+        "checks": {
+            "passes": 10598,
+            "fails": 0,
+            "value": 1
+        },
+        "iteration_duration": {
+            "avg": 7.055210930364203,
+            "p(95)": 11.23993935,
+            "p(99)": 16.490789860000003
+        },
+        "data_sent": {
+            "count": 2780922,
+            "rate": 185313.6526340208
+        },
+        "data_received": {
+            "count": 6502166,
+            "rate": 433287.9999844442
+        }
+    },
+    "root_group": {
+        "path": "",
+        "id": "d41d8cd98f00b204e9800998ecf8427e",
+        "groups": {},
+        "checks": {
+                "hot write created": {
+                    "path": "::hot write created",
+                    "id": "fcbb539f8eefd75ccb5b705e0db41c6d",
+                    "passes": 10598,
+                    "fails": 0,
+                    "name": "hot write created"
+                }
+            },
+        "name": ""
+    }
+}

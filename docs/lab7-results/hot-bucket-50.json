@@ -1,0 +1,100 @@
+{
+    "metrics": {
+        "http_req_waiting": {
+            "avg": 24.950545211932656,
+            "p(95)": 42.32309005,
+            "p(99)": 58.74685629999998
+        },
+        "iterations": {
+            "count": 29264,
+            "rate": 1946.5675436159388
+        },
+        "http_req_tls_handshaking": {
+            "avg": 0,
+            "p(95)": 0,
+            "p(99)": 0
+        },
+        "http_req_connecting": {
+            "avg": 0.04790808980317114,
+            "p(95)": 0,
+            "p(99)": 0
+        },
+        "http_req_receiving": {
+            "p(95)": 0.37219909999999956,
+            "p(99)": 4.712316229999985,
+            "avg": 0.21137312130945898
+        },
+        "data_received": {
+            "count": 17979279,
+            "rate": 1195936.336762426
+        },
+        "http_req_duration": {
+            "avg": 25.216949740876263,
+            "p(95)": 42.79271345,
+            "p(99)": 59.27641615999994
+        },
+        "checks": {
+            "passes": 29264,
+            "fails": 0,
+            "value": 1
+        },
+        "data_sent": {
+            "rate": 511599.1779965611,
+            "count": 7691199
+        },
+        "http_req_blocked": {
+            "p(95)": 0.009505249999999993,
+            "p(99)": 0.05307491999999958,
+            "avg": 0.08783293391197393
+        },
+        "http_req_sending": {
+            "p(99)": 0.49703358999999786,
+            "avg": 0.05503140763395329,
+            "p(95)": 0.06694824999999999
+        },
+        "iteration_duration": {
+            "avg": 25.619267264044538,
+            "p(95)": 43.32678094999999,
+            "p(99)": 60.99908143
+        },
+        "vus_max": {
+            "max": 50,
+            "value": 50,
+            "min": 50
+        },
+        "http_reqs": {
+            "count": 29264,
+            "rate": 1946.5675436159388
+        },
+        "vus": {
+            "value": 50,
+            "min": 50,
+            "max": 50
+        },
+        "http_req_duration{expected_response:true}": {
+            "avg": 25.216949740876263,
+            "p(95)": 42.79271345,
+            "p(99)": 59.27641615999994
+        },
+        "http_req_failed": {
+            "fails": 29264,
+            "passes": 0,
+            "value": 0
+        }
+    },
+    "root_group": {
+        "checks": {
+            "hot write created": {
+                "fails": 0,
+                "name": "hot write created",
+                "path": "::hot write created",
+                "id": "fcbb539f8eefd75ccb5b705e0db41c6d",
+                "passes": 29264
+            }
+        },
+        "name": "",
+        "path": "",
+        "id": "d41d8cd98f00b204e9800998ecf8427e",
+        "groups": {}
+    }
+}

@@ -1,0 +1,10 @@
+2026-11-12T22:02:12.9311998Z|onlinetesting-db-1|72.71%|157.2MiB / 7.612GiB
+2026-11-12T22:02:12.9311998Z|onlinetesting-db_shard_b-1|1.90%|149.7MiB / 7.612GiB
+2026-11-12T22:02:16.2302425Z|onlinetesting-db-1|27.38%|158.6MiB / 7.612GiB
+2026-11-12T22:02:16.2302425Z|onlinetesting-db_shard_b-1|8.08%|150.6MiB / 7.612GiB
+2026-11-12T22:02:19.3996336Z|onlinetesting-db-1|24.18%|158.6MiB / 7.612GiB
+2026-11-12T22:02:19.3996336Z|onlinetesting-db_shard_b-1|0.25%|150.2MiB / 7.612GiB
+2026-11-12T22:02:22.5803899Z|onlinetesting-db-1|25.01%|158.3MiB / 7.612GiB
+2026-11-12T22:02:22.5803899Z|onlinetesting-db_shard_b-1|0.30%|150.4MiB / 7.612GiB
+2026-11-12T22:02:25.7524964Z|onlinetesting-db-1|8.79%|158.7MiB / 7.612GiB
+2026-11-12T22:02:25.7524964Z|onlinetesting-db_shard_b-1|6.24%|151.7MiB / 7.612GiB
