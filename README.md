@@ -449,3 +449,16 @@ pwsh -NoProfile -File load-tests/run-lab8.ps1 -StageSeconds 30
 Звіт формується у `docs/lab8-results/report.md` із таблицею метрик і графіком затримок. Stampede й avalanche сценарії виконують реальні SELECT-запити до PostgreSQL та рахують їх у контрольних метриках. Failure modes і межі описані у `docs/lab8-architecture.md`.
 
 **Resilience profile:** cache misses координуються Redis lock-ом; TTL jitter розподіляє expiration; короткий negative cache обмежує запити для відсутніх ID. Якщо Redis недоступний, cache-aside читає з PostgreSQL без координації, тому навантаження може зрости. Межі lock lease, coalescing timeout і stale negative cache задокументовані в архітектурному описі.
+
+## Лабораторна 9 — Performance Profiling (частина студента 1)
+
+Для `GET /api/attempts/{attemptId}` додано трасування OpenTelemetry та параметр `splitQuery` для порівняння двох режимів: `false` — один SQL-запит (baseline), `true` — `AsSplitQuery()` (оптимізований режим). Відповідь містить `X-Lab9-Query-Mode`; span `lab9.attempt.read` має атрибути `lab9.query.mode` і `lab9.attempt.id`. Експорт трас і метрик налаштовується змінними `OTEL_EXPORTER_OTLP_ENDPOINT`, `OTEL_EXPORTER_OTLP_PROTOCOL` та `OTEL_SERVICE_NAME`.
+
+Наприклад, з токеном спроби в заголовку `X-Attempt-Token`:
+
+```text
+GET /api/attempts/123?splitQuery=false
+GET /api/attempts/123?splitQuery=true
+```
+
+Обидва режими потрібно вимірювати на тій самій спробі та при однаковому навантаженні. `AsSplitQuery()` може зменшити дублювання рядків при завантаженні кількох колекцій, але виконує більше SQL-запитів; висновок про виграш робиться лише за результатами профілювання.
