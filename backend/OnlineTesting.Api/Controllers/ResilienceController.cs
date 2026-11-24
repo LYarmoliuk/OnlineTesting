@@ -122,10 +122,13 @@ public sealed class ResilienceController(
                 .Select(test => test.Id)
                 .FirstOrDefaultAsync(ct);
             await Task.Delay(25, ct);
+            
             var baseTtl = TimeSpan.FromSeconds(Math.Clamp(ttlSeconds, 2, 60));
-            var halfTtlMs = (long)(baseTtl.TotalMilliseconds / 2);
+
             var ttl = jitter
-                ? baseTtl + TimeSpan.FromMilliseconds(Random.Shared.NextInt64(-halfTtlMs, halfTtlMs + 1))
+                ? TimeSpan.FromMilliseconds(
+                    baseTtl.TotalMilliseconds * (0.5 + (double)i / (keyCount - 1))
+                )
                 : baseTtl;
             await distributedCache.SetStringAsync(key, "ok",
                 new DistributedCacheEntryOptions { AbsoluteExpirationRelativeToNow = ttl }, ct);
