@@ -1,0 +1,10 @@
+[
+  {
+    "shard": "shard-a",
+    "writes": 24627
+  },
+  {
+    "shard": "shard-b",
+    "writes": 1377
+  }
+]

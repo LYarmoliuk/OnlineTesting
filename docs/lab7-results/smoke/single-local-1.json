@@ -1,0 +1,100 @@
+{
+    "metrics": {
+        "http_req_duration": {
+            "avg": 4.973114833333332,
+            "p(95)": 8.548967999999991,
+            "p(99)": 11.9722407
+        },
+        "vus": {
+            "value": 1,
+            "min": 1,
+            "max": 1
+        },
+        "http_req_tls_handshaking": {
+            "avg": 0,
+            "p(95)": 0,
+            "p(99)": 0
+        },
+        "iteration_duration": {
+            "p(95)": 9.1539591,
+            "p(99)": 12.356165660000002,
+            "avg": 5.276141976190477
+        },
+        "iterations": {
+            "count": 378,
+            "rate": 188.589025381471
+        },
+        "http_reqs": {
+            "count": 378,
+            "rate": 188.589025381471
+        },
+        "http_req_receiving": {
+            "p(99)": 0.4515554500000005,
+            "avg": 0.16200241005290997,
+            "p(95)": 0.3110245999999999
+        },
+        "http_req_blocked": {
+            "p(95)": 0.013225349999999999,
+            "p(99)": 0.02911773000000002,
+            "avg": 0.021314640211640222
+        },
+        "http_req_sending": {
+            "avg": 0.035560955026455,
+            "p(95)": 0.08458755,
+            "p(99)": 0.1386425500000002
+        },
+        "data_sent": {
+            "rate": 38849.33922858303,
+            "count": 77868
+        },
+        "data_received": {
+            "count": 217078,
+            "rate": 108302.98532211366
+        },
+        "checks": {
+            "passes": 378,
+            "fails": 0,
+            "value": 1
+        },
+        "http_req_connecting": {
+            "avg": 0.0074155873015873015,
+            "p(95)": 0,
+            "p(99)": 0
+        },
+        "vus_max": {
+            "value": 1,
+            "min": 1,
+            "max": 1
+        },
+        "http_req_waiting": {
+            "p(95)": 8.391364549999993,
+            "p(99)": 11.342297160000005,
+            "avg": 4.775551468253966
+        },
+        "http_req_failed": {
+            "passes": 0,
+            "fails": 378,
+            "value": 0
+        },
+        "http_req_duration{expected_response:true}": {
+            "avg": 4.973114833333332,
+            "p(95)": 8.548967999999991,
+            "p(99)": 11.9722407
+        }
+    },
+    "root_group": {
+        "name": "",
+        "path": "",
+        "id": "d41d8cd98f00b204e9800998ecf8427e",
+        "groups": {},
+        "checks": {
+                "local read reached one shard": {
+                    "name": "local read reached one shard",
+                    "path": "::local read reached one shard",
+                    "id": "84c4aa6615ca273a10afd6df3cbfc7a2",
+                    "passes": 378,
+                    "fails": 0
+                }
+            }
+    }
+}

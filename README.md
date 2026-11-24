@@ -422,3 +422,16 @@ pwsh -NoProfile -File load-tests/run-write-workflow.ps1 -StageSeconds 30
 Перевірки: `pwsh -File scripts/verify-lab6-topology.ps1`, `pwsh -File scripts/verify-lab6-routing.ps1`, `pwsh -File scripts/verify-lab6-lag.ps1`, `pwsh -File scripts/verify-lab6-failover.ps1`. Порівняння продуктивності: `pwsh -File load-tests/run-lab6-read.ps1 -StageSeconds 30`. Результат з'явиться у `docs/lab6-read-scaling.md`. Архітектурна схема: `docs/lab6-architecture.md`.
 
 На захисті покажіть `pg_stat_replication`, `pg_is_in_recovery()`, stale read під час паузи WAL replay, свіжий `GET /api/tests/{id}` з primary, fallback при зупинці replica і read-only деградацію при зупинці primary. Реплікація асинхронна: primary не чекає підтвердження replica. Синхронна чекає підтвердження за заданим рівнем, напівсинхронна — проміжний рівень підтвердження. Автоматичного promotion немає: для уникнення split-brain потрібен окремий лідер і механізм consensus (наприклад, Raft). CAP стосується компромісу при поділі мережі, PACELC також описує latency/consistency у звичайному режимі.
+
+## 16. Лабораторна 7 — шардинг даних
+
+Журнал подій спроб `lab7_events` розміщено на двох фізичних PostgreSQL-шардах: Shard A (`db`, із реплікою ЛР6) і Shard B (`db_shard_b`, власний volume). CRUD маршрутизується за `student_id + attempt_id` через 64 віртуальні кошики; пошук по всіх подіях робить паралельний fan-out. Контрольні стратегії `single` і `legacy` дозволяють виміряти один вузол та «гарячий» шард.
+
+```powershell
+docker compose up -d --build
+pwsh -NoProfile -File scripts/verify-lab7.ps1
+pwsh -NoProfile -File load-tests/run-lab7.ps1 -Smoke
+pwsh -NoProfile -File load-tests/run-lab7.ps1 -StageSeconds 15
+```
+
+Опис ключа, схема, cross-shard обмеження та сценарій захисту: [docs/lab7-architecture.md](docs/lab7-architecture.md). Фактичні матриці розподілу, метрики RPS/p95/p99/error rate, hot shard і модель 2 → 3: [docs/lab7-results/report.md](docs/lab7-results/report.md). Збережіть локальний `.env`; архів лабораторної його не містить.

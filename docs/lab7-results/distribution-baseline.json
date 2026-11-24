@@ -1,0 +1,77 @@
+[
+  {
+    "strategy": "single",
+    "count": 20,
+    "hotPercent": 90,
+    "attemptBase": 7000000,
+    "eventType": "report-fresh-single",
+    "rows": [
+      {
+        "shard": "shard-a",
+        "records": 20,
+        "dataPct": 100.0,
+        "writeOperations": 20,
+        "writePct": 100.0
+      },
+      {
+        "shard": "shard-b",
+        "records": 0,
+        "dataPct": 0.0,
+        "writeOperations": 0,
+        "writePct": 0.0
+      }
+    ],
+    "writeP95Ms": 31.04,
+    "writeP99Ms": 57.66
+  },
+  {
+    "strategy": "legacy",
+    "count": 20,
+    "hotPercent": 90,
+    "attemptBase": 7000000,
+    "eventType": "report-fresh-legacy",
+    "rows": [
+      {
+        "shard": "shard-a",
+        "records": 20,
+        "dataPct": 100.0,
+        "writeOperations": 20,
+        "writePct": 100.0
+      },
+      {
+        "shard": "shard-b",
+        "records": 0,
+        "dataPct": 0.0,
+        "writeOperations": 0,
+        "writePct": 0.0
+      }
+    ],
+    "writeP95Ms": 25.16,
+    "writeP99Ms": 27.08
+  },
+  {
+    "strategy": "bucket",
+    "count": 20,
+    "hotPercent": 90,
+    "attemptBase": 7000000,
+    "eventType": "report-fresh-bucket",
+    "rows": [
+      {
+        "shard": "shard-a",
+        "records": 10,
+        "dataPct": 50.0,
+        "writeOperations": 10,
+        "writePct": 50.0
+      },
+      {
+        "shard": "shard-b",
+        "records": 10,
+        "dataPct": 50.0,
+        "writeOperations": 10,
+        "writePct": 50.0
+      }
+    ],
+    "writeP95Ms": 17.01,
+    "writeP99Ms": 45.82
+  }
+]

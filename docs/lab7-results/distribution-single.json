@@ -1,0 +1,25 @@
+{
+  "strategy": "single",
+  "count": 300,
+  "hotPercent": 90,
+  "attemptBase": 7000000,
+  "eventType": "lab7-seed-206aac83083f46648306b43bc5fccc05",
+  "rows": [
+    {
+      "shard": "shard-a",
+      "records": 300,
+      "dataPct": 100.0,
+      "writeOperations": 300,
+      "writePct": 100.0
+    },
+    {
+      "shard": "shard-b",
+      "records": 0,
+      "dataPct": 0.0,
+      "writeOperations": 0,
+      "writePct": 0.0
+    }
+  ],
+  "writeP95Ms": 15.41,
+  "writeP99Ms": 22.8
+}

@@ -1,0 +1,62 @@
+[
+  {
+    "mode": "single-local",
+    "strategy": "single",
+    "vus": 1,
+    "seconds": 2,
+    "requests": 378,
+    "rps": 188.59,
+    "p95Ms": 8.55,
+    "p99Ms": 11.97,
+    "errorPct": 0.0,
+    "failedChecks": 0
+  },
+  {
+    "mode": "sharded-local",
+    "strategy": "bucket",
+    "vus": 1,
+    "seconds": 2,
+    "requests": 360,
+    "rps": 179.8,
+    "p95Ms": 9.22,
+    "p99Ms": 14.53,
+    "errorPct": 0.0,
+    "failedChecks": 0
+  },
+  {
+    "mode": "fanout",
+    "strategy": "bucket",
+    "vus": 1,
+    "seconds": 2,
+    "requests": 346,
+    "rps": 172.65,
+    "p95Ms": 9.16,
+    "p99Ms": 12.13,
+    "errorPct": 0.0,
+    "failedChecks": 0
+  },
+  {
+    "mode": "hot-legacy",
+    "strategy": "legacy",
+    "vus": 1,
+    "seconds": 2,
+    "requests": 234,
+    "rps": 116.57,
+    "p95Ms": 14.63,
+    "p99Ms": 16.85,
+    "errorPct": 0.0,
+    "failedChecks": 0
+  },
+  {
+    "mode": "hot-bucket",
+    "strategy": "bucket",
+    "vus": 1,
+    "seconds": 2,
+    "requests": 233,
+    "rps": 116.25,
+    "p95Ms": 14.95,
+    "p99Ms": 18.32,
+    "errorPct": 0.0,
+    "failedChecks": 0
+  }
+]

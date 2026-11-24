@@ -1,0 +1,25 @@
+{
+  "strategy": "bucket",
+  "count": 300,
+  "hotPercent": 90,
+  "attemptBase": 7000000,
+  "eventType": "lab7-seed-206aac83083f46648306b43bc5fccc05",
+  "rows": [
+    {
+      "shard": "shard-a",
+      "records": 162,
+      "dataPct": 54.0,
+      "writeOperations": 162,
+      "writePct": 54.0
+    },
+    {
+      "shard": "shard-b",
+      "records": 138,
+      "dataPct": 46.0,
+      "writeOperations": 138,
+      "writePct": 46.0
+    }
+  ],
+  "writeP95Ms": 10.49,
+  "writeP99Ms": 15.52
+}
