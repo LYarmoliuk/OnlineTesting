@@ -1,0 +1,72 @@
+[
+  {
+    "mode": "unprotected",
+    "vus": 500,
+    "seconds": 30,
+    "rps": 3825.68,
+    "p95Ms": 301.99,
+    "p99Ms": 507.14,
+    "errorPct": 0.0,
+    "failedChecks": 0,
+    "resourceDbLoads": 500,
+    "entityDbLoads": 0,
+    "avalancheDbLoads": 0,
+    "requests": 115142
+  },
+  {
+    "mode": "protected",
+    "vus": 500,
+    "seconds": 30,
+    "rps": 3822.92,
+    "p95Ms": 302.61,
+    "p99Ms": 501.38,
+    "errorPct": 0.0,
+    "failedChecks": 0,
+    "resourceDbLoads": 1,
+    "entityDbLoads": 0,
+    "avalancheDbLoads": 0,
+    "requests": 115439
+  },
+  {
+    "mode": "penetration",
+    "vus": 500,
+    "seconds": 30,
+    "rps": 3988.26,
+    "p95Ms": 298.13,
+    "p99Ms": 494.85,
+    "errorPct": 0.0,
+    "failedChecks": 0,
+    "resourceDbLoads": 0,
+    "entityDbLoads": 95,
+    "avalancheDbLoads": 0,
+    "requests": 120050
+  },
+  {
+    "mode": "avalanche-sync",
+    "vus": 500,
+    "seconds": 30,
+    "rps": 3954.85,
+    "p95Ms": 309.14,
+    "p99Ms": 665.55,
+    "errorPct": 0.0,
+    "failedChecks": 0,
+    "resourceDbLoads": 0,
+    "entityDbLoads": 0,
+    "avalancheDbLoads": 37181,
+    "requests": 118738
+  },
+  {
+    "mode": "avalanche-jitter",
+    "vus": 500,
+    "seconds": 30,
+    "rps": 4299.37,
+    "p95Ms": 235.12,
+    "p99Ms": 379.46,
+    "errorPct": 0.0,
+    "failedChecks": 0,
+    "resourceDbLoads": 0,
+    "entityDbLoads": 0,
+    "avalancheDbLoads": 34209,
+    "requests": 129266
+  }
+]
