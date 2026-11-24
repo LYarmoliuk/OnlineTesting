@@ -435,3 +435,17 @@ pwsh -NoProfile -File load-tests/run-lab7.ps1 -StageSeconds 15
 ```
 
 Опис ключа, схема, cross-shard обмеження та сценарій захисту: [docs/lab7-architecture.md](docs/lab7-architecture.md). Фактичні матриці розподілу, метрики RPS/p95/p99/error rate, hot shard і модель 2 → 3: [docs/lab7-results/report.md](docs/lab7-results/report.md). Збережіть локальний `.env`; архів лабораторної його не містить.
+
+## 17. Лабораторна 8 — Cache Resilience
+
+Контрольні endpoint `/api/lab8` демонструють cache stampede з/без Redis lock і request coalescing, synchronized expiry проти TTL jitter, а також negative caching. Короткий smoke або повне порівняння 500 VUs запускається командами:
+
+```powershell
+pwsh -NoProfile -File scripts/verify-lab8.ps1
+pwsh -NoProfile -File load-tests/run-lab8.ps1 -Smoke
+pwsh -NoProfile -File load-tests/run-lab8.ps1 -StageSeconds 30
+```
+
+Звіт формується у `docs/lab8-results/report.md` із таблицею метрик і графіком затримок. Stampede й avalanche сценарії виконують реальні SELECT-запити до PostgreSQL та рахують їх у контрольних метриках. Failure modes і межі описані у `docs/lab8-architecture.md`.
+
+**Resilience profile:** cache misses координуються Redis lock-ом; TTL jitter розподіляє expiration; короткий negative cache обмежує запити для відсутніх ID. Якщо Redis недоступний, cache-aside читає з PostgreSQL без координації, тому навантаження може зрости. Межі lock lease, coalescing timeout і stale negative cache задокументовані в архітектурному описі.

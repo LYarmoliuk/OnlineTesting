@@ -87,7 +87,7 @@ public sealed class QuestionsController(AppDbContext dbContext, CacheAsideServic
         var primaryOnly = Request.Headers["X-Lab6-Primary-Only"] == "1";
         var result = await cache.ReadAsync(
             CacheKeys.QuestionsForTest(testId),
-            TimeSpan.FromSeconds(60),
+            CacheAsideService.WithJitter(TimeSpan.FromSeconds(60), TimeSpan.FromSeconds(15)),
             async token =>
             {
                 var read = await reads.ReadAsync(async (db, ct) =>

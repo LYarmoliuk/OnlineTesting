@@ -21,7 +21,7 @@ public sealed class TestsController(AppDbContext dbContext, CacheAsideService ca
         var primaryOnly = Request.Headers["X-Lab6-Primary-Only"] == "1";
         var result = await cache.ReadAsync(
             CacheKeys.TestsList,
-            TimeSpan.FromSeconds(30),
+            CacheAsideService.WithJitter(TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(10)),
             async token =>
             {
                 var read = await reads.ReadAsync((db, ct) => db.Tests
