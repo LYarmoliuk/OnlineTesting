@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using OnlineTesting.Api.Data;
 using OnlineTesting.Api.Models;
+using OnlineTesting.Api.Profiling;
 
 namespace OnlineTesting.Api.Controllers;
 
@@ -136,10 +137,17 @@ public sealed class AttemptsController(AppDbContext dbContext)
     public async Task<ActionResult<StudentAttemptResponseDto>> GetAttempt(
         int attemptId,
         [FromHeader(Name = TokenHeader)] Guid accessToken,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken,
+        [FromQuery] bool splitQuery = true)
     {
-        var attempt = await dbContext.TestAttempts
-            .AsNoTracking()
+        Response.Headers["X-Lab9-Query-Mode"] = splitQuery ? "split" : "single";
+        using var activity = Lab9Diagnostics.ActivitySource.StartActivity("lab9.attempt.read");
+        activity?.SetTag("lab9.query.mode", splitQuery ? "split" : "single");
+        activity?.SetTag("lab9.attempt.id", attemptId);
+
+        var query = dbContext.TestAttempts.AsNoTracking();
+        query = splitQuery ? query.AsSplitQuery() : query.AsSingleQuery();
+        var attempt = await query
             .Include(a => a.Test)
                 .ThenInclude(t => t.Questions)
                     .ThenInclude(q => q.AnswerOptions)

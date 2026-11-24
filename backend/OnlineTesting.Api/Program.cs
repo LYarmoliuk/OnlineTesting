@@ -3,9 +3,26 @@ using Microsoft.EntityFrameworkCore;
 using Npgsql;
 using OnlineTesting.Api.Caching;
 using OnlineTesting.Api.Data;
+using OnlineTesting.Api.Profiling;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
 using StackExchange.Redis;
 
 var builder = WebApplication.CreateBuilder(args);
+
+var serviceName = builder.Configuration["OTEL_SERVICE_NAME"] ?? "onlinetesting-api";
+builder.Services.AddOpenTelemetry()
+    .ConfigureResource(resource => resource.AddService(serviceName))
+    .WithTracing(tracing => tracing
+        .AddAspNetCoreInstrumentation()
+        .AddNpgsql()
+        .AddSource(Lab9Diagnostics.SourceName)
+        .AddOtlpExporter())
+    .WithMetrics(metrics => metrics
+        .AddAspNetCoreInstrumentation()
+        .AddRuntimeInstrumentation()
+        .AddOtlpExporter());
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
