@@ -1,0 +1,144 @@
+{
+    "metrics": {
+        "data_received": {
+            "count": 439571,
+            "rate": 42741.89822715491
+        },
+        "http_req_duration{expected_response:true}": {
+            "min": 237.610171,
+            "med": 605.9663705,
+            "max": 4815.041967,
+            "p(90)": 1798.8380625,
+            "p(95)": 3487.9912242999985,
+            "avg": 1015.5496096399999
+        },
+        "http_req_duration": {
+            "max": 4815.041967,
+            "p(90)": 1798.8380625,
+            "p(95)": 3487.9912242999985,
+            "avg": 1015.5496096399999,
+            "min": 237.610171,
+            "med": 605.9663705
+        },
+        "http_req_sending": {
+            "max": 3.418261,
+            "p(90)": 0.33620010000000006,
+            "p(95)": 0.47286629999999996,
+            "avg": 0.21163536000000008,
+            "min": 0.039449,
+            "med": 0.09644549999999999
+        },
+        "data_sent": {
+            "count": 8350,
+            "rate": 811.9162779090146
+        },
+        "http_req_tls_handshaking": {
+            "avg": 0,
+            "min": 0,
+            "med": 0,
+            "max": 0,
+            "p(90)": 0,
+            "p(95)": 0
+        },
+        "iteration_duration": {
+            "p(95)": 3526.2222256499986,
+            "avg": 1020.9888249000003,
+            "min": 255.478501,
+            "med": 608.105037,
+            "max": 4844.781639,
+            "p(90)": 1806.4683601
+        },
+        "iterations": {
+            "rate": 4.8617741192156565,
+            "count": 50
+        },
+        "checks": {
+            "passes": 150,
+            "fails": 0,
+            "value": 1
+        },
+        "vus": {
+            "value": 5,
+            "min": 5,
+            "max": 5
+        },
+        "http_req_blocked": {
+            "med": 0.022947000000000002,
+            "max": 19.913422,
+            "p(90)": 5.589414800000021,
+            "p(95)": 19.672769249999998,
+            "avg": 2.1390451,
+            "min": 0.015212
+        },
+        "http_req_connecting": {
+            "max": 17.888681,
+            "p(90)": 1.7345840000000246,
+            "p(95)": 17.5165586,
+            "avg": 1.7624677999999998,
+            "min": 0,
+            "med": 0
+        },
+        "http_req_failed": {
+            "passes": 0,
+            "fails": 50,
+            "thresholds": {
+                "rate<0.01": false
+            },
+            "value": 0
+        },
+        "vus_max": {
+            "value": 5,
+            "min": 5,
+            "max": 5
+        },
+        "http_req_waiting": {
+            "min": 234.91332,
+            "med": 603.7534275,
+            "max": 4810.626987,
+            "p(90)": 1791.7992106000002,
+            "p(95)": 3479.493143249999,
+            "avg": 1004.2669105799995
+        },
+        "http_req_receiving": {
+            "med": 6.3020315,
+            "max": 90.718105,
+            "p(90)": 24.432932200000003,
+            "p(95)": 36.59949469999998,
+            "avg": 11.0710637,
+            "min": 0.223493
+        },
+        "http_reqs": {
+            "count": 50,
+            "rate": 4.8617741192156565
+        }
+    },
+    "root_group": {
+        "groups": {},
+        "checks": {
+                "attempt read returns 200": {
+                    "name": "attempt read returns 200",
+                    "path": "::attempt read returns 200",
+                    "id": "e0dd9f07a304da6c2dc659866b1c2a96",
+                    "passes": 50,
+                    "fails": 0
+                },
+                "response has expected query mode": {
+                    "name": "response has expected query mode",
+                    "path": "::response has expected query mode",
+                    "id": "a24fe1a6373c1677c4db3ec304f5cb8b",
+                    "passes": 50,
+                    "fails": 0
+                },
+                "response contains fixture questions": {
+                    "name": "response contains fixture questions",
+                    "path": "::response contains fixture questions",
+                    "id": "dbe8b553e36d14b3170788f23f1a71a9",
+                    "passes": 50,
+                    "fails": 0
+                }
+            },
+        "name": "",
+        "path": "",
+        "id": "d41d8cd98f00b204e9800998ecf8427e"
+    }
+}

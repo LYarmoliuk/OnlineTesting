@@ -1,0 +1,23 @@
+services:
+  api_a:
+    environment:
+      OTEL_SERVICE_NAME: onlinetesting-api-a
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://jaeger:4317
+      OTEL_EXPORTER_OTLP_PROTOCOL: grpc
+  api_b:
+    environment:
+      OTEL_SERVICE_NAME: onlinetesting-api-b
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://jaeger:4317
+      OTEL_EXPORTER_OTLP_PROTOCOL: grpc
+  api_c:
+    environment:
+      OTEL_SERVICE_NAME: onlinetesting-api-c
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://jaeger:4317
+      OTEL_EXPORTER_OTLP_PROTOCOL: grpc
+  jaeger:
+    image: cr.jaegertracing.io/jaegertracing/jaeger:2.23.0
+    restart: unless-stopped
+    ports:
+      - "16686:16686"
+    networks:
+      - testing-network
