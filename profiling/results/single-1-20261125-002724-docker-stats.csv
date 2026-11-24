@@ -1,0 +1,12 @@
+timestamp,container,cpu,memory
+2026-11-25T00:32:02.7931895+02:00,onlinetesting-api_b-1,79.10%,109MiB / 3.671GiB
+2026-11-25T00:32:02.7931895+02:00,onlinetesting-api_c-1,76.34%,106.7MiB / 3.671GiB
+2026-11-25T00:32:02.7931895+02:00,onlinetesting-api_a-1,89.82%,107MiB / 3.671GiB
+2026-11-25T00:32:02.7931895+02:00,onlinetesting-jaeger-1,0.28%,57.03MiB / 3.671GiB
+2026-11-25T00:32:02.7931895+02:00,onlinetesting-frontend-1,0.00%,5.836MiB / 3.671GiB
+2026-11-25T00:32:02.7931895+02:00,onlinetesting-db_shard_b-1,0.14%,14.68MiB / 3.671GiB
+2026-11-25T00:32:02.7931895+02:00,onlinetesting-redis-1,1.47%,13.98MiB / 3.671GiB
+2026-11-25T00:32:02.7931895+02:00,onlinetesting-db_replica-1,14.19%,23.98MiB / 3.671GiB
+2026-11-25T00:32:02.7931895+02:00,onlinetesting-db-1,0.87%,28.32MiB / 3.671GiB
+2026-11-25T00:32:02.7931895+02:00,minikube,206.21%,1.804GiB / 2.148GiB
+2026-11-25T00:32:02.7931895+02:00,competent_northcutt,79.54%,12.03MiB / 3.671GiB
