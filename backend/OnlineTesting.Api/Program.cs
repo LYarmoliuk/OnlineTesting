@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Npgsql;
 using OnlineTesting.Api.Caching;
 using OnlineTesting.Api.Data;
+using StackExchange.Redis;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -27,6 +28,8 @@ builder.Services.AddStackExchangeRedisCache(options =>
         ?? "redis:6379,abortConnect=false,connectTimeout=1000,syncTimeout=1000";
     options.InstanceName = "online-testing:lab4:";
 });
+builder.Services.AddSingleton<IConnectionMultiplexer>(_ => ConnectionMultiplexer.Connect(
+    builder.Configuration["Cache:RedisConnection"] ?? "redis:6379,abortConnect=false,connectTimeout=1000,syncTimeout=1000"));
 builder.Services.AddScoped<CacheAsideService>();
 builder.Services.AddScoped<CacheInvalidationInterceptor>();
 builder.Services.AddScoped<ReplicaReadService>();
