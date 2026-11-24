@@ -1,0 +1,25 @@
+{
+  "strategy": "legacy",
+  "count": 20,
+  "hotPercent": 90,
+  "attemptBase": 7000000,
+  "eventType": "report-fresh-legacy",
+  "rows": [
+    {
+      "shard": "shard-a",
+      "records": 20,
+      "dataPct": 100.0,
+      "writeOperations": 20,
+      "writePct": 100.0
+    },
+    {
+      "shard": "shard-b",
+      "records": 0,
+      "dataPct": 0.0,
+      "writeOperations": 0,
+      "writePct": 0.0
+    }
+  ],
+  "writeP95Ms": 25.16,
+  "writeP99Ms": 27.08
+}

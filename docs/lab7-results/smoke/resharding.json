@@ -1,0 +1,11 @@
+{
+  "keys": 10000,
+  "virtualBuckets": 64,
+  "addedShard": "shard-c",
+  "movedBuckets": 22,
+  "naiveMoved": 6750,
+  "naiveMovedPct": 67.5,
+  "virtualMoved": 3384,
+  "virtualMovedPct": 33.84,
+  "theoreticalNewShardSharePct": 33.33
+}

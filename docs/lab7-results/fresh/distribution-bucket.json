@@ -1,0 +1,25 @@
+{
+  "strategy": "bucket",
+  "count": 20,
+  "hotPercent": 90,
+  "attemptBase": 7000000,
+  "eventType": "report-fresh-bucket",
+  "rows": [
+    {
+      "shard": "shard-a",
+      "records": 10,
+      "dataPct": 50.0,
+      "writeOperations": 10,
+      "writePct": 50.0
+    },
+    {
+      "shard": "shard-b",
+      "records": 10,
+      "dataPct": 50.0,
+      "writeOperations": 10,
+      "writePct": 50.0
+    }
+  ],
+  "writeP95Ms": 17.01,
+  "writeP99Ms": 45.82
+}
